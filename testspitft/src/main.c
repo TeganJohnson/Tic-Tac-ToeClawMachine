@@ -638,6 +638,9 @@ int main(void)
     Joystick_ADC_Init();
     TCS_Init();
 
+    LCD_FillColor(COLOR_BLACK);
+    display_countdown(3000, COLOR_YELLOW, COLOR_BLACK);
+
     UI_DrawStatic();
 
     uint16_t lastX = 0xFFFF;
@@ -649,10 +652,11 @@ int main(void)
 
     while (1) 
     {
+
         uint16_t jx, jy;
         uint8_t pressed;
 
-        Joystick_Read(&jx, &jy, &pressed);  // your read function
+        Joystick_Read(&jx, &jy, &pressed);
 
         // --- X update ---
         if ( (lastX == 0xFFFF) || ( (jx > lastX + 10) || (jx + 10 < lastX) ) ) {
@@ -693,7 +697,6 @@ int main(void)
             uint32_t cR, cG, cB;
             TCS_MeasureRawCounts(100, &cR, &cG, &cB); // 100ms per color
 
-            // normalize to 0-255 for display
             uint32_t mx = cR;
             if (cG > mx) mx = cG;
             if (cB > mx) mx = cB;
@@ -702,9 +705,7 @@ int main(void)
             uint8_t G = (uint8_t)((cG * 255) / mx);
             uint8_t B = (uint8_t)((cB * 255) / mx);
 
-            // Update numeric readout and swatch when values change
             if ((R != lastR) || (G != lastG) || (B != lastB)) {
-                // Clear area for RGB values
                 LCD_FillRect(60, 140, 140, 80, COLOR_BLACK);
 
                 u16_to_str(R, buf);
@@ -716,14 +717,12 @@ int main(void)
                 u16_to_str(B, buf);
                 LCD_DrawString(60, 200, buf, COLOR_WHITE, COLOR_BLACK, 2);
 
-                // Draw a color swatch
                 uint16_t color565 = RGB24_to_RGB565(R, G, B);
                 LCD_FillRect(160, 140, 60, 60, color565);
 
                 lastR = R; lastG = G; lastB = B;
             }
 
-            // Classify the raw counts into empty / player1 / player2
             cell_state_t state = classify_color_from_counts(cR, cG, cB);
             const char *slabel = "";
             if (state == CELL_EMPTY) slabel = "EMPTY";
@@ -731,7 +730,6 @@ int main(void)
             else if (state == CELL_PLAYER2_BLUE) slabel = "PLAYER 2 (BLUE)";
             else slabel = "UNKNOWN";
 
-            // Draw classification
             LCD_FillRect(10, 230, 220, 24, COLOR_BLACK);
             LCD_DrawString(10, 230, (char*)slabel, COLOR_YELLOW, COLOR_BLACK, 2);
         }

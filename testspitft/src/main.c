@@ -28,6 +28,193 @@
 #define PLAYER_TURN_TIME_MS 5000 //5 seconds per player turn
 #define TRANSITION_TIME_MS  5000 //5 seconds between turns
 
+// ----------------------------------------------------------------------------
+// Game State Definitions
+// ----------------------------------------------------------------------------
+typedef enum {
+    STATE_IDLE = 0,
+    STATE_PLAYER1_TURN,
+    STATE_PLAYER2_TURN,
+    STATE_CHECK_BOARD,
+    STATE_PLAYER1_WIN,
+    STATE_PLAYER2_WIN,
+    STATE_DRAW,
+    STATE_RESET
+} game_state_t;
+
+typedef enum {
+    PLAYER_NONE = 0,
+    PLAYER_1 = 1,
+    PLAYER_2 = 2
+} player_t;
+
+// ----------------------------------------------------------------------------
+// Game Data Structures
+// ----------------------------------------------------------------------------
+typedef struct {
+    game_state_t current_state;
+    player_t active_player;
+    uint8_t board[9];  // 1D array: index = row*3 + col
+                       // [0][1][2]
+                       // [3][4][5]
+                       // [6][7][8]
+    uint32_t turn_start_time;
+    uint8_t move_count;
+    uint8_t last_move_cell;  // Index 0-8 of last move
+} game_context_t;
+
+static game_context_t game;
+
+// Winning line lookup table (8 possible winning combinations)
+static const uint8_t win_lines[8][3] = {
+    {0, 1, 2},  // Row 0
+    {3, 4, 5},  // Row 1
+    {6, 7, 8},  // Row 2
+    {0, 3, 6},  // Col 0
+    {1, 4, 7},  // Col 1
+    {2, 5, 8},  // Col 2
+    {0, 4, 8},  // Diagonal
+    {2, 4, 6}   // Diagonal
+};
+
+// Helper: Convert 1D index to row/col
+static inline uint8_t IndexToRow(uint8_t index) { return index / 3; }
+static inline uint8_t IndexToCol(uint8_t index) { return index % 3; }
+static inline uint8_t RowColToIndex(uint8_t row, uint8_t col) { return row * 3 + col; }
+
+static void u16_to_str(uint16_t v, char *buf)
+{
+    char tmp[6];
+    int pos = 0;
+    if (v == 0) {
+        buf[0] = '0'; buf[1] = '\0';
+        return;
+    }
+    while (v > 0 && pos < 5) {
+        tmp[pos++] = '0' + (v % 10);
+        v /= 10;
+    }
+    for (int i = 0; i < pos; i++) buf[i] = tmp[pos - 1 - i];
+    buf[pos] = '\0';
+}
+
+// ----------------------------------------------------------------------------
+// Board Management Functions
+// ----------------------------------------------------------------------------
+static void Board_Init(void)
+{
+    for (uint8_t i = 0; i < 9; i++) {
+        game.board[i] = PLAYER_NONE;
+    }
+    game.move_count = 0;
+    game.last_move_cell = 0xFF;
+}
+
+static uint8_t Board_IsCellEmpty(uint8_t cell_index)
+{
+    if (cell_index >= 9) return 0;
+    return (game.board[cell_index] == PLAYER_NONE);
+}
+
+static void Board_PlaceToken(uint8_t cell_index, player_t player)
+{
+    if (cell_index < 9 && game.board[cell_index] == PLAYER_NONE) {
+        game.board[cell_index] = player;
+        game.move_count++;
+        game.last_move_cell = cell_index;
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Win/Draw Detection Functions
+// ----------------------------------------------------------------------------
+static player_t Board_CheckWinner(void)
+{
+    // Check all 8 possible winning lines
+    for (uint8_t line = 0; line < 8; line++) {
+        uint8_t a = win_lines[line][0];
+        uint8_t b = win_lines[line][1];
+        uint8_t c = win_lines[line][2];
+        
+        if (game.board[a] != PLAYER_NONE &&
+            game.board[a] == game.board[b] &&
+            game.board[b] == game.board[c]) {
+            return game.board[a];
+        }
+    }
+    
+    return PLAYER_NONE;
+}
+
+static uint8_t Board_IsDraw(void)
+{
+    return (game.move_count >= 9 && Board_CheckWinner() == PLAYER_NONE);
+}
+
+// ----------------------------------------------------------------------------
+// Display Update Functions
+// ----------------------------------------------------------------------------
+static void Display_ShowIdleScreen(void)
+{
+    LCD_FillColor(COLOR_BLACK);
+    LCD_DrawStringCentered("TIC TAC TOE", COLOR_YELLOW, COLOR_BLACK, 3);
+    LCD_DrawString(40, 200, "PRESS BUTTON", COLOR_WHITE, COLOR_BLACK, 2);
+    LCD_DrawString(60, 230, "TO START", COLOR_WHITE, COLOR_BLACK, 2);
+}
+
+static void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms)
+{
+    LCD_FillColor(COLOR_BLACK);
+    
+    if (player == PLAYER_1) {
+        LCD_DrawString(40, 40, "PLAYER 1 TURN", COLOR_RED, COLOR_BLACK, 2);
+    } else {
+        LCD_DrawString(40, 40, "PLAYER 2 TURN", COLOR_BLUE, COLOR_BLACK, 2);
+    }
+    
+    // Draw timer countdown
+    char time_str[8];
+    uint8_t seconds = (time_remaining_ms + 999) / 1000;
+    u16_to_str(seconds, time_str);
+    
+    LCD_DrawString(60, 100, "TIME:", COLOR_WHITE, COLOR_BLACK, 3);
+    LCD_DrawString(140, 100, time_str, COLOR_YELLOW, COLOR_BLACK, 3);
+    
+    // Instructions
+    LCD_DrawString(30, 200, "USE JOYSTICK", COLOR_WHITE, COLOR_BLACK, 2);
+    LCD_DrawString(20, 230, "PRESS TO DROP", COLOR_WHITE, COLOR_BLACK, 2);
+}
+
+static void Display_ShowWinner(player_t winner)
+{
+    LCD_FillColor(COLOR_BLACK);
+    
+    if (winner == PLAYER_1) {
+        LCD_DrawStringCentered("PLAYER 1", COLOR_RED, COLOR_BLACK, 4);
+        LCD_DrawString(80, 180, "WINS!", COLOR_RED, COLOR_BLACK, 4);
+    } else {
+        LCD_DrawStringCentered("PLAYER 2", COLOR_BLUE, COLOR_BLACK, 4);
+        LCD_DrawString(80, 180, "WINS!", COLOR_BLUE, COLOR_BLACK, 4);
+    }
+    
+    delay_ms(3000);
+}
+
+static void Display_ShowDraw(void)
+{
+    LCD_FillColor(COLOR_BLACK);
+    LCD_DrawStringCentered("DRAW", COLOR_YELLOW, COLOR_BLACK, 5);
+    LCD_DrawString(50, 180, "NO WINNER", COLOR_WHITE, COLOR_BLACK, 2);
+    delay_ms(3000);
+}
+
+static void Display_ShowCheckingBoard(void)
+{
+    LCD_FillColor(COLOR_BLACK);
+    LCD_DrawStringCentered("CHECKING", COLOR_YELLOW, COLOR_BLACK, 3);
+    LCD_DrawString(50, 180, "BOARD STATE", COLOR_WHITE, COLOR_BLACK, 2);
+}
+
 //----------------------------------------------------
 // Delay
 //----------------------------------------------------

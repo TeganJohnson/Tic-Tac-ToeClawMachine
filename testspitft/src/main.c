@@ -54,7 +54,7 @@ typedef enum {
 typedef struct {
     game_state_t current_state;
     player_t active_player;
-    uint8_t board[9];  // 1D array: index = row*3 + col
+    uint8_t board[9];
                        // [0][1][2]
                        // [3][4][5]
                        // [6][7][8]
@@ -77,7 +77,7 @@ static const uint8_t win_lines[8][3] = {
     {2, 4, 6}   // Diagonal
 };
 
-// Helper: Convert 1D index to row/col
+// Convert 1D index to row/col
 static inline uint8_t IndexToRow(uint8_t index) { return index / 3; }
 static inline uint8_t IndexToCol(uint8_t index) { return index % 3; }
 static inline uint8_t RowColToIndex(uint8_t row, uint8_t col) { return row * 3 + col; }

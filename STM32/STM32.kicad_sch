@@ -4684,6 +4684,18 @@
 		(uuid 34aabfec-ad2c-497a-91ae-24a52e51c320)
 	)
 	(rectangle
+		(start 193.04 12.7)
+		(end 231.14 43.18)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 39cb902d-e024-4f7b-934b-266e2879fff7)
+	)
+	(rectangle
 		(start 12.7 76.2)
 		(end 60.96 132.08)
 		(stroke
@@ -4732,18 +4744,6 @@
 		(uuid bbabaae8-f4b0-40b3-9736-fa72f1be4407)
 	)
 	(rectangle
-		(start 218.44 43.18)
-		(end 251.46 66.04)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(fill
-			(type none)
-		)
-		(uuid c69b4819-2b24-4155-89c1-a84a9120748b)
-	)
-	(rectangle
 		(start 12.7 162.56)
 		(end 127 193.04)
 		(stroke
@@ -4786,7 +4786,7 @@
 		(uuid "008bd468-d51f-4d41-8a12-b04e0599b725")
 	)
 	(junction
-		(at 238.76 55.88)
+		(at 217.17 27.94)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "03aceebe-b7e4-49bc-9a9b-7f3a13e0bd8e")
@@ -5653,7 +5653,7 @@
 	)
 	(wire
 		(pts
-			(xy 232.41 55.88) (xy 238.76 55.88)
+			(xy 210.82 27.94) (xy 217.17 27.94)
 		)
 		(stroke
 			(width 0)
@@ -5883,7 +5883,7 @@
 	)
 	(wire
 		(pts
-			(xy 238.76 55.88) (xy 246.38 55.88)
+			(xy 217.17 27.94) (xy 224.79 27.94)
 		)
 		(stroke
 			(width 0)
@@ -6842,7 +6842,7 @@
 		(uuid "93f683da-b071-4d8f-a79c-0bb9a240f333")
 	)
 	(label "But"
-		(at 246.38 55.88 0)
+		(at 224.79 27.94 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7263,7 +7263,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_1x08_P1.00mm_Vertical"
 			(at 45.72 118.11 0)
 			(effects
 				(font
@@ -7349,7 +7349,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_2x06_P1.00mm_Vertical"
 			(at 252.73 107.95 0)
 			(effects
 				(font
@@ -7448,7 +7448,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 100.0252 181.61 0)
 			(effects
 				(font
@@ -7517,7 +7517,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 89.8652 181.61 0)
 			(effects
 				(font
@@ -7651,7 +7651,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 260.604 54.864 90)
 			(effects
 				(font
@@ -7695,7 +7695,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 222.25 55.88 0)
+		(at 200.66 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7704,7 +7704,7 @@
 		(fields_autoplaced yes)
 		(uuid "33f4435a-0d0f-4ddb-bf32-b81f26dfcdea")
 		(property "Reference" "#PWR016"
-			(at 222.25 62.23 0)
+			(at 200.66 34.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7713,7 +7713,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 222.25 60.96 0)
+			(at 200.66 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7721,7 +7721,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 222.25 55.88 0)
+			(at 200.66 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7730,7 +7730,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 222.25 55.88 0)
+			(at 200.66 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7739,7 +7739,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 222.25 55.88 0)
+			(at 200.66 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7761,7 +7761,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 238.76 63.5 0)
+		(at 217.17 35.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7770,7 +7770,7 @@
 		(fields_autoplaced yes)
 		(uuid "3ad529fd-f9d9-4b04-863e-d6a1663d9eaa")
 		(property "Reference" "#PWR025"
-			(at 238.76 69.85 0)
+			(at 217.17 41.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7779,7 +7779,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 238.76 68.58 0)
+			(at 217.17 40.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7787,7 +7787,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 238.76 63.5 0)
+			(at 217.17 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7796,7 +7796,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 238.76 63.5 0)
+			(at 217.17 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7805,7 +7805,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 238.76 63.5 0)
+			(at 217.17 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7893,7 +7893,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 238.76 59.69 0)
+		(at 217.17 31.75 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7902,7 +7902,7 @@
 		(fields_autoplaced yes)
 		(uuid "416f3ce4-b68d-4ce9-a5dd-5a85f7e72aa6")
 		(property "Reference" "C7"
-			(at 242.57 58.4199 0)
+			(at 220.98 30.4799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7911,7 +7911,7 @@
 			)
 		)
 		(property "Value" "C"
-			(at 242.57 60.9599 0)
+			(at 220.98 33.0199 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7919,8 +7919,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
-			(at 239.7252 63.5 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 218.1352 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7929,7 +7929,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 238.76 59.69 0)
+			(at 217.17 31.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7938,7 +7938,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 238.76 59.69 0)
+			(at 217.17 31.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7987,7 +7987,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_1x08_P1.00mm_Vertical"
 			(at 22.86 118.11 0)
 			(effects
 				(font
@@ -8140,7 +8140,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 18.7452 181.61 0)
 			(effects
 				(font
@@ -8473,7 +8473,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 56.8452 181.61 0)
 			(effects
 				(font
@@ -8649,7 +8649,7 @@
 	)
 	(symbol
 		(lib_id "Switch:SW_Push")
-		(at 227.33 55.88 0)
+		(at 205.74 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8657,8 +8657,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "73483d25-ed62-459d-90a0-3cf0a27fc26c")
-		(property "Reference" "Button"
-			(at 227.33 48.26 0)
+		(property "Reference" "Button1"
+			(at 205.74 20.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8666,15 +8666,15 @@
 			)
 		)
 		(property "Value" "~"
-			(at 227.33 50.8 0)
+			(at 205.74 22.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Footprint" ""
-			(at 227.33 50.8 0)
+		(property "Footprint" "Button_Switch_SMD:SW_SPST_TL3342"
+			(at 205.74 22.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8683,7 +8683,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 227.33 50.8 0)
+			(at 205.74 22.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8692,7 +8692,7 @@
 			)
 		)
 		(property "Description" "Push button switch, generic, two pins"
-			(at 227.33 55.88 0)
+			(at 205.74 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8709,7 +8709,7 @@
 		(instances
 			(project ""
 				(path "/4c59bd81-5775-41d0-8b13-aaa71c70e7bc"
-					(reference "Button")
+					(reference "Button1")
 					(unit 1)
 				)
 			)
@@ -8725,7 +8725,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "75c8cbf7-deaf-4999-adae-e7f266829245")
-		(property "Reference" "Display(ILI9341TFT)"
+		(property "Reference" "Display(ILI9341TFT)1"
 			(at 29.845 20.32 0)
 			(effects
 				(font
@@ -8741,7 +8741,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_1x08_P1.00mm_Vertical"
 			(at 29.21 33.02 0)
 			(effects
 				(font
@@ -8795,7 +8795,7 @@
 		(instances
 			(project ""
 				(path "/4c59bd81-5775-41d0-8b13-aaa71c70e7bc"
-					(reference "Display(ILI9341TFT)")
+					(reference "Display(ILI9341TFT)1")
 					(unit 1)
 				)
 			)
@@ -8827,7 +8827,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_2x06_P1.00mm_Vertical"
 			(at 252.73 142.24 0)
 			(effects
 				(font
@@ -8992,7 +8992,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 41.6052 181.61 0)
 			(effects
 				(font
@@ -9061,7 +9061,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 64.4652 181.61 0)
 			(effects
 				(font
@@ -9105,7 +9105,7 @@
 	)
 	(symbol
 		(lib_id "Device:R_US")
-		(at 238.76 52.07 0)
+		(at 217.17 24.13 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9114,7 +9114,7 @@
 		(fields_autoplaced yes)
 		(uuid "858c831f-e8b8-4d6a-b70c-aa8f86b0c1db")
 		(property "Reference" "R3"
-			(at 241.3 50.7999 0)
+			(at 219.71 22.8599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9123,7 +9123,7 @@
 			)
 		)
 		(property "Value" "R_US"
-			(at 241.3 53.3399 0)
+			(at 219.71 25.3999 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9131,8 +9131,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
-			(at 239.776 52.324 90)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 218.186 24.384 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9141,7 +9141,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 238.76 52.07 0)
+			(at 217.17 24.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9150,7 +9150,7 @@
 			)
 		)
 		(property "Description" "Resistor, US symbol"
-			(at 238.76 52.07 0)
+			(at 217.17 24.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9199,7 +9199,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_1x06_P1.00mm_Vertical"
 			(at 45.72 90.17 0)
 			(effects
 				(font
@@ -9279,7 +9279,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_SPST_TL3342"
 			(at 248.92 21.59 0)
 			(effects
 				(font
@@ -9397,7 +9397,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "97733873-02b9-4e0a-9bf6-283d022349b7")
-		(property "Reference" "Joystick"
+		(property "Reference" "Joystick1"
 			(at 23.495 138.43 0)
 			(effects
 				(font
@@ -9413,7 +9413,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_1x05_P1.00mm_Vertical"
 			(at 22.86 148.59 0)
 			(effects
 				(font
@@ -9458,7 +9458,7 @@
 		(instances
 			(project ""
 				(path "/4c59bd81-5775-41d0-8b13-aaa71c70e7bc"
-					(reference "Joystick")
+					(reference "Joystick1")
 					(unit 1)
 				)
 			)
@@ -9624,7 +9624,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 262.636 23.114 90)
 			(effects
 				(font
@@ -9694,7 +9694,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 262.5852 34.29 0)
 			(effects
 				(font
@@ -9812,7 +9812,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "afd88410-3912-4d19-9cb2-0163632a10e9")
-		(property "Reference" "STLink"
+		(property "Reference" "STLink1"
 			(at 34.29 52.07 0)
 			(effects
 				(font
@@ -9828,7 +9828,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_2x05_P1.00mm_Vertical"
 			(at 33.02 63.5 0)
 			(effects
 				(font
@@ -9888,7 +9888,7 @@
 		(instances
 			(project ""
 				(path "/4c59bd81-5775-41d0-8b13-aaa71c70e7bc"
-					(reference "STLink")
+					(reference "STLink1")
 					(unit 1)
 				)
 			)
@@ -10251,7 +10251,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 33.9852 181.61 0)
 			(effects
 				(font
@@ -10625,7 +10625,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V0")
-		(at 238.76 48.26 0)
+		(at 217.17 20.32 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10634,7 +10634,7 @@
 		(fields_autoplaced yes)
 		(uuid "d652935e-8edd-4b4d-a379-f7a84913c93d")
 		(property "Reference" "#PWR024"
-			(at 238.76 52.07 0)
+			(at 217.17 24.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10643,7 +10643,7 @@
 			)
 		)
 		(property "Value" "+3V0"
-			(at 238.76 43.18 0)
+			(at 217.17 15.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10651,7 +10651,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 238.76 48.26 0)
+			(at 217.17 20.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10660,7 +10660,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 238.76 48.26 0)
+			(at 217.17 20.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10669,7 +10669,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V0\""
-			(at 238.76 48.26 0)
+			(at 217.17 20.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10716,7 +10716,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 26.3652 181.61 0)
 			(effects
 				(font
@@ -10850,7 +10850,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_1x06_P1.00mm_Vertical"
 			(at 22.86 90.17 0)
 			(effects
 				(font
@@ -11060,7 +11060,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 48.26 175.768 90)
 			(effects
 				(font
@@ -11128,7 +11128,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_1.00mm:PinHeader_2x06_P1.00mm_Vertical"
 			(at 252.73 80.01 0)
 			(effects
 				(font

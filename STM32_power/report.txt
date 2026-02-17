@@ -1,0 +1,143 @@
+Info: Processing symbol 'SW1:'.
+Info: Processing symbol 'C1:'.
+Info: Processing symbol 'R1:'.
+Info: Total warnings: 0, errors: 4.
+Info: Processing symbol 'R2:'.
+Info: Processing symbol 'U1:Package_QFP:LQFP-64_10x10mm_P0.5mm'.
+
+Add net /PB12.
+Add net /PB1.
+Added U1 (footprint 'Package_QFP:LQFP-64_10x10mm_P0.5mm').
+Changed REF** reference designator to U1.
+Changed U1 value from LQFP-64_10x10mm_P0.5mm to STM32F091RCTx.
+Updated U1 symbol association from  to /ee1d4cf6-2991-4e6e-80de-840bcf05ceef.
+Updated U1 fields.
+Updated U1 sheetname to '/'.
+Updated U1 sheetfile to 'STM32.kicad_sch'.
+Updated U1 footprint filters to 'LQFP*10x10mm*P0.5mm*'.
+Add net /PA4.
+Connected U1 pin 20 to /PA4.
+Add net /PA15.
+Connected U1 pin 50 to /PA15.
+Add net /PB9.
+Connected U1 pin 62 to /PB9.
+Add net /PC4.
+Connected U1 pin 24 to /PC4.
+Add net /PC7.
+Connected U1 pin 38 to /PC7.
+Add net /PA14.
+Connected U1 pin 49 to /PA14.
+Add net GND.
+Connected U1 pin 47 to GND.
+Add net /PC0.
+Connected U1 pin 8 to /PC0.
+Add net +3VD.
+Connected U1 pin 64 to +3VD.
+Connected U1 pin 48 to +3VD.
+Add net /PC15.
+Connected U1 pin 4 to /PC15.
+Add net /PA6.
+Connected U1 pin 22 to /PA6.
+Connected U1 pin 32 to +3VD.
+Add net /PB11.
+Connected U1 pin 30 to /PB11.
+Add net /PA1.
+Connected U1 pin 15 to /PA1.
+Add net /PA0.
+Connected U1 pin 14 to /PA0.
+Add net /PC12.
+Connected U1 pin 53 to /PC12.
+Connected U1 pin 63 to GND.
+Add net /PA9.
+Connected U1 pin 42 to /PA9.
+Add net /PC2.
+Connected U1 pin 10 to /PC2.
+Add net /PB15.
+Connected U1 pin 36 to /PB15.
+Add net /PC1.
+Connected U1 pin 9 to /PC1.
+Add net /PB0.
+Connected U1 pin 26 to /PB0.
+Add net /PD2.
+Connected U1 pin 54 to /PD2.
+Add net /BOOT0 PF11.
+Connected U1 pin 60 to /BOOT0 PF11.
+Add net /PB5.
+Connected U1 pin 57 to /PB5.
+Add net /PA10.
+Connected U1 pin 43 to /PA10.
+Add net /PA7.
+
+Connected U1 pin 23 to /PA7.
+Connected U1 pin 35 to /PB14.
+Add net /PB14.
+Connected U1 pin 27 to /PB1.
+Connected U1 pin 33 to /PB12.
+Connected U1 pin 11 to /PC3.
+Add net /PC10.
+Connected U1 pin 51 to /PC10.
+Add net /3VA.
+Connected U1 pin 13 to /3VA.
+Add net /PA2.
+Connected U1 pin 16 to /PA2.
+Add net /PB3.
+Connected U1 pin 55 to /PB3.
+Add net /PF0.
+Connected U1 pin 5 to /PF0.
+Add net /NRST.
+Connected U1 pin 7 to /NRST.
+Add net /PC6.
+Connected U1 pin 37 to /PC6.
+Add net /PC11.
+Connected U1 pin 52 to /PC11.
+Add net /PB7.
+Connected U1 pin 59 to /PB7.
+Add net /PB2.
+Connected U1 pin 28 to /PB2.
+Add net /PB4.
+Connected U1 pin 56 to /PB4.
+Add net /PC5.
+Connected U1 pin 25 to /PC5.
+Add net /PF1.
+Connected U1 pin 6 to /PF1.
+Add net /PA13.
+Connected U1 pin 46 to /PA13.
+Connected U1 pin 31 to GND.
+Add net /PB10.
+Connected U1 pin 29 to /PB10.
+Add net /PA12.
+Connected U1 pin 45 to /PA12.
+Add net /PC9.
+Connected U1 pin 40 to /PC9.
+Add net /PB13.
+Connected U1 pin 34 to /PB13.
+Add net /PA3.
+Connected U1 pin 17 to /PA3.
+Add net /PC8.
+Connected U1 pin 39 to /PC8.
+Add net /PA11.
+Connected U1 pin 44 to /PA11.
+Connected U1 pin 12 to GND.
+Add net /PA8.
+Connected U1 pin 41 to /PA8.
+Add net /PA5.
+Connected U1 pin 21 to /PA5.
+Connected U1 pin 1 to +3VD.
+Add net /PB8.
+Connected U1 pin 61 to /PB8.
+Connected U1 pin 18 to GND.
+Connected U1 pin 19 to +3VD.
+Add net /PC14.
+Connected U1 pin 3 to /PC14.
+Add net /PC13.
+Connected U1 pin 2 to /PC13.
+Add net /PB6.
+Connected U1 pin 58 to /PB6.
+Add net /PC3.
+Error: Cannot add R2 (no footprint assigned).
+Error: Cannot add R1 (no footprint assigned).
+Error: Cannot add C1 (no footprint assigned).
+Error: Cannot add SW1 (no footprint assigned).
+
+
+Info: Total warnings: 0, errors: 4.

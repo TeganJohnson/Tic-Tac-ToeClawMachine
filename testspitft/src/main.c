@@ -83,6 +83,47 @@ void LCD_WriteData(uint8_t data)
 }
 
 // ----------------------------------------------------
+// TCS shared control pins
+// ----------------------------------------------------
+#define TCS_GPIO        GPIOA
+#define TCS_S0_PIN      9
+#define TCS_S1_PIN      12
+#define TCS_S2_PIN      8
+#define TCS_S3_PIN      11
+#define TCS_LED_PIN     10
+
+typedef enum {
+    CELL_EMPTY = 0,
+    CELL_PLAYER1_RED = 1,
+    CELL_PLAYER2_BLUE = 2,
+    CELL_UNKNOWN = 3
+} cell_state_t;
+
+typedef struct {
+    GPIO_TypeDef *port;
+    uint8_t pin;
+} sensor_out_t;
+
+// Grid positions:
+// 1 2 3
+// 4 5 6
+// 7 8 9
+static const sensor_out_t sensor_outputs[9] = {
+    {GPIOC, 9},   // Cell 1
+    {GPIOC, 6},   // Cell 2
+    {GPIOB, 13},  // Cell 3
+    {GPIOC, 7},   // Cell 4
+    {GPIOB, 14},  // Cell 5
+    {GPIOB, 11},  // Cell 6
+    {GPIOC, 8},   // Cell 7
+    {GPIOB, 15},  // Cell 8
+    {GPIOB, 12}   // Cell 9
+};
+
+#define TCS_PRESENCE_THRESHOLD    200
+#define TCS_COLOR_RATIO_PERCENT   140
+
+// ----------------------------------------------------
 // GPIO / SPI Init
 // ----------------------------------------------------
 static void GPIO_Init(void)
@@ -110,21 +151,50 @@ static void GPIO_Init(void)
     JOY_GPIO->PUPDR &= ~(3 << (JOY_BTN_PIN * 2));
     JOY_GPIO->PUPDR |=  (1 << (JOY_BTN_PIN * 2));
 
-    // --- TCS3200 color sensor pins ---
-    // PA5 = OUT input
-    // PA6-PA10 = S0,S1,S2,S3,OE outputs
-    JOY_GPIO->MODER &= ~((3 << (5*2)) | (3 << (6*2)) | (3 << (7*2)) |
-                         (3 << (8*2)) | (3 << (9*2)) | (3 << (10*2)));
+    // --- Shared TCS control pins: PA8, PA9, PA10, PA11, PA12 as outputs ---
+    GPIOA->MODER &= ~((3 << (8*2))  |
+                      (3 << (9*2))  |
+                      (3 << (10*2)) |
+                      (3 << (11*2)) |
+                      (3 << (12*2)));
 
-    JOY_GPIO->MODER |=  ((1 << (6*2)) | (1 << (7*2)) | (1 << (8*2)) |
-                         (1 << (9*2)) | (1 << (10*2)));
+    GPIOA->MODER |=  ((1 << (8*2))  |
+                      (1 << (9*2))  |
+                      (1 << (10*2)) |
+                      (1 << (11*2)) |
+                      (1 << (12*2)));
 
-    JOY_GPIO->PUPDR &= ~((3 << (5*2)) | (3 << (6*2)) | (3 << (7*2)) |
-                         (3 << (8*2)) | (3 << (9*2)) | (3 << (10*2)));
+    GPIOA->PUPDR &= ~((3 << (8*2))  |
+                      (3 << (9*2))  |
+                      (3 << (10*2)) |
+                      (3 << (11*2)) |
+                      (3 << (12*2)));
 
-    // Default: OE high (disabled), S0-S3 low
-    JOY_GPIO->BSRR = (1 << 10);
-    JOY_GPIO->BRR  = (1 << 6) | (1 << 7) | (1 << 8) | (1 << 9);
+    // --- 9 TCS output pins as inputs ---
+
+    // PC6, PC7, PC8, PC9
+    GPIOC->MODER &= ~((3 << (6*2)) |
+                      (3 << (7*2)) |
+                      (3 << (8*2)) |
+                      (3 << (9*2)));
+
+    GPIOC->PUPDR &= ~((3 << (6*2)) |
+                      (3 << (7*2)) |
+                      (3 << (8*2)) |
+                      (3 << (9*2)));
+
+    // PB11, PB12, PB13, PB14, PB15
+    GPIOB->MODER &= ~((3 << (11*2)) |
+                      (3 << (12*2)) |
+                      (3 << (13*2)) |
+                      (3 << (14*2)) |
+                      (3 << (15*2)));
+
+    GPIOB->PUPDR &= ~((3 << (11*2)) |
+                      (3 << (12*2)) |
+                      (3 << (13*2)) |
+                      (3 << (14*2)) |
+                      (3 << (15*2)));
 }
 
 static void SPI1_Init(void)
@@ -223,26 +293,8 @@ static void LCD_Init(void)
 }
 
 // ----------------------------------------------------
-// TCS3200 sensor support
+// TCS grid scan support
 // ----------------------------------------------------
-#define TCS_GPIO        GPIOA
-#define TCS_S0_PIN      6
-#define TCS_S1_PIN      7
-#define TCS_S2_PIN      8
-#define TCS_S3_PIN      9
-#define TCS_OE_PIN      10
-#define TCS_OUT_PIN     5
-
-static volatile uint32_t tcs_pulse_count = 0;
-
-void EXTI4_15_IRQHandler(void)
-{
-    if (EXTI->PR & (1 << TCS_OUT_PIN)) {
-        tcs_pulse_count++;
-        EXTI->PR = (1 << TCS_OUT_PIN);
-    }
-}
-
 static void TCS_SetPin(uint8_t pin, uint8_t value)
 {
     if (value)
@@ -257,48 +309,111 @@ static void TCS_Init(void)
     TCS_SetPin(TCS_S0_PIN, 1);
     TCS_SetPin(TCS_S1_PIN, 1);
 
-    // Enable output
-    TCS_SetPin(TCS_OE_PIN, 0);
-
-    EXTI->IMR  |= (1 << TCS_OUT_PIN);
-    EXTI->RTSR |= (1 << TCS_OUT_PIN);
-    EXTI->FTSR &= ~(1 << TCS_OUT_PIN);
-
-    EXTI->PR = (1 << TCS_OUT_PIN);
-
-    NVIC_EnableIRQ(EXTI4_15_IRQn);
-}
-
-// Optional raw measurement helpers kept here for later board-scan work
-static uint32_t TCS_MeasureWindowMs(uint32_t ms)
-{
-    tcs_pulse_count = 0;
-    EXTI->PR = (1 << TCS_OUT_PIN);
-
-    uint32_t start = millis();
-    while ((millis() - start) < ms) {
-    }
-
-    return tcs_pulse_count;
-}
-
-static void TCS_MeasureRawCounts(uint32_t window_ms, uint32_t *outR, uint32_t *outG, uint32_t *outB)
-{
+    // Default color select
     TCS_SetPin(TCS_S2_PIN, 0);
     TCS_SetPin(TCS_S3_PIN, 0);
-    uint32_t cR = TCS_MeasureWindowMs(window_ms);
 
+    // Turn board illumination LEDs on
+    TCS_SetPin(TCS_LED_PIN, 1);
+}
+
+static uint32_t CountPulsesOnPin(GPIO_TypeDef *port, uint8_t pin, uint32_t ms)
+{
+    uint32_t count = 0;
+    uint8_t last_state = (port->IDR & (1 << pin)) ? 1 : 0;
+    uint32_t start = millis();
+
+    while ((millis() - start) < ms) {
+        uint8_t current_state = (port->IDR & (1 << pin)) ? 1 : 0;
+
+        // Count rising edges
+        if (current_state && !last_state) {
+            count++;
+        }
+
+        last_state = current_state;
+    }
+
+    return count;
+}
+
+static void TCS_MeasureRawCounts_ForSensor(uint8_t sensor_index,
+                                           uint32_t window_ms,
+                                           uint32_t *outR,
+                                           uint32_t *outG,
+                                           uint32_t *outB)
+{
+    GPIO_TypeDef *port = sensor_outputs[sensor_index].port;
+    uint8_t pin = sensor_outputs[sensor_index].pin;
+
+    // RED: S2=0, S3=0
+    TCS_SetPin(TCS_S2_PIN, 0);
+    TCS_SetPin(TCS_S3_PIN, 0);
+    *outR = CountPulsesOnPin(port, pin, window_ms);
+
+    // GREEN: S2=1, S3=1
     TCS_SetPin(TCS_S2_PIN, 1);
     TCS_SetPin(TCS_S3_PIN, 1);
-    uint32_t cG = TCS_MeasureWindowMs(window_ms);
+    *outG = CountPulsesOnPin(port, pin, window_ms);
 
+    // BLUE: S2=0, S3=1
     TCS_SetPin(TCS_S2_PIN, 0);
     TCS_SetPin(TCS_S3_PIN, 1);
-    uint32_t cB = TCS_MeasureWindowMs(window_ms);
+    *outB = CountPulsesOnPin(port, pin, window_ms);
+}
 
-    *outR = cR;
-    *outG = cG;
-    *outB = cB;
+static cell_state_t classify_color_from_counts(uint32_t cR, uint32_t cG, uint32_t cB)
+{
+    uint32_t mx = cR;
+    if (cG > mx) mx = cG;
+    if (cB > mx) mx = cB;
+
+    if (mx < TCS_PRESENCE_THRESHOLD) {
+        return CELL_EMPTY;
+    }
+
+    uint32_t second = cR;
+    if (mx == cR) {
+        second = (cG > cB) ? cG : cB;
+    } else if (mx == cG) {
+        second = (cR > cB) ? cR : cB;
+    } else {
+        second = (cR > cG) ? cR : cG;
+    }
+
+    if (second == 0) second = 1;
+    uint32_t percent = (mx * 100) / second;
+
+    if (percent < TCS_COLOR_RATIO_PERCENT) {
+        return CELL_UNKNOWN;
+    }
+
+    if (mx == cR) return CELL_PLAYER1_RED;
+    if (mx == cB) return CELL_PLAYER2_BLUE;
+    return CELL_UNKNOWN;
+}
+
+static cell_state_t TCS_ClassifySensor(uint8_t sensor_index)
+{
+    uint32_t cR, cG, cB;
+    TCS_MeasureRawCounts_ForSensor(sensor_index, 50, &cR, &cG, &cB);
+    return classify_color_from_counts(cR, cG, cB);
+}
+
+// This is the function game.c can call later
+void Hardware_ScanBoard(uint8_t scanned_board[9])
+{
+    for (uint8_t i = 0; i < 9; i++) {
+        cell_state_t state = TCS_ClassifySensor(i);
+
+        if (state == CELL_PLAYER1_RED) {
+            scanned_board[i] = PLAYER_1;
+        } else if (state == CELL_PLAYER2_BLUE) {
+            scanned_board[i] = PLAYER_2;
+        } else {
+            scanned_board[i] = PLAYER_NONE;
+        }
+    }
 }
 
 // ----------------------------------------------------

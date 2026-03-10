@@ -15,6 +15,7 @@ extern void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms);
 extern void Display_ShowCheckingBoard(void);
 extern void Display_ShowWinner(player_t winner);
 extern void Display_ShowDraw(void);
+extern void Hardware_ScanBoard(uint8_t scanned_board[9]);
 
 // -----------------------------------------------------------------------------
 // Static game context
@@ -93,18 +94,7 @@ static uint8_t Board_IsDraw(void)
 // -----------------------------------------------------------------------------
 static void Board_ScanAllCells(uint8_t scanned_board[9])
 {
-    // -----------------------------------------------------------------
-    // TEMP PLACEHOLDER:
-    // Copy existing board so project compiles and state machine works.
-    //
-    // Later this function should:
-    // 1. Scan each physical tic-tac-toe cell
-    // 2. Determine EMPTY / PLAYER_1 / PLAYER_2
-    // 3. Fill scanned_board[0..8]
-    // -----------------------------------------------------------------
-    for (uint8_t i = 0; i < 9; i++) {
-        scanned_board[i] = game.board[i];
-    }
+   Hardware_ScanBoard(scanned_board);
 }
 
 static void Board_UpdateFromScan(void)
@@ -218,8 +208,6 @@ static void Handle_PlayerTurnState(void)
 
     Display_ShowPlayerTurn(game.active_player, remaining);
 
-    // A turn ends either when the player presses the button
-    // or when the timer expires. After that, always scan board.
     if (pressed) {
         Claw_DropToken();
         Game_ChangeState(STATE_CHECK_BOARD);

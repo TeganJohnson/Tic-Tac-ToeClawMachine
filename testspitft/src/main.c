@@ -1,19 +1,28 @@
 #include "stm32f0xx.h"
 #include "game.h"
 
-//LCD Pin Connections (STM32F091RC)
-//PC0 -> Chip Select (CS)
-//PC1 -> Reset (RST)
-//PC2 -> Data/Command Select (DC)
-//PC3 -> Backlight (LED)
-//PB3 -> SPI1_SCK
-//PB5 -> SPI1_MOSI
+// LCD Pin Connections (STM32F091RC)
+// PB0  -> Chip Select (CS)
+// PC5  -> Reset (RST)
+// PA7  -> Data/Command Select (DC/RS)
+// PA6  -> Backlight (LED_T)
+// PC4  -> SPI1_SCK  (AF0)
+// PA5  -> SPI1_MOSI (AF0)
 
-#define JOY_GPIO        GPIOA
-#define JOY_BTN_PIN     4
+#define LCD_CS_GPIO     GPIOB
+#define LCD_CS_PIN      0
+#define LCD_RST_GPIO    GPIOC
+#define LCD_RST_PIN     5
+#define LCD_DC_GPIO     GPIOA
+#define LCD_DC_PIN      7
+#define LCD_LED_GPIO    GPIOA
+#define LCD_LED_PIN     6
 
-#define JOY_X_CHANNEL   ADC_CHSELR_CHSEL0   // PA0 -> ADC channel 0
-#define JOY_Y_CHANNEL   ADC_CHSELR_CHSEL1   // PA1 -> ADC channel 1
+#define JOY_GPIO        GPIOB
+#define JOY_BTN_PIN     1
+
+#define JOY_X_CHANNEL   ADC_CHSELR_CHSEL11  // PB10 -> ADC channel 11
+#define JOY_Y_CHANNEL   ADC_CHSELR_CHSEL12  // PB2  -> ADC channel 12 (if wired, else verify)
 
 // ----------------------------------------------------
 // Delay
@@ -68,18 +77,18 @@ static void SPI1_SendByte(uint8_t data)
 // ----------------------------------------------------
 void LCD_WriteCommand(uint8_t cmd)
 {
-    GPIOC->BRR  = (1 << 2);   // DC low
-    GPIOC->BRR  = (1 << 0);   // CS low
+    LCD_DC_GPIO->BRR  = (1 << LCD_DC_PIN);   // DC low
+    LCD_CS_GPIO->BRR  = (1 << LCD_CS_PIN);   // CS low
     SPI1_SendByte(cmd);
-    GPIOC->BSRR = (1 << 0);   // CS high
+    LCD_CS_GPIO->BSRR = (1 << LCD_CS_PIN);   // CS high
 }
 
 void LCD_WriteData(uint8_t data)
 {
-    GPIOC->BSRR = (1 << 2);   // DC high
-    GPIOC->BRR  = (1 << 0);   // CS low
+    LCD_DC_GPIO->BSRR = (1 << LCD_DC_PIN);   // DC high
+    LCD_CS_GPIO->BRR  = (1 << LCD_CS_PIN);   // CS low
     SPI1_SendByte(data);
-    GPIOC->BSRR = (1 << 0);   // CS high
+    LCD_CS_GPIO->BSRR = (1 << LCD_CS_PIN);   // CS high
 }
 
 // ----------------------------------------------------
@@ -128,28 +137,50 @@ static const sensor_out_t sensor_outputs[9] = {
 // ----------------------------------------------------
 static void GPIO_Init(void)
 {
-    // Enable GPIOB / GPIOC / GPIOA clocks
-    RCC->AHBENR |= (1 << 18) | (1 << 19);
-    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+    // Enable GPIOA, GPIOB, GPIOC clocks
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOCEN;
 
-    // PC0-PC3 outputs
-    GPIOC->MODER &= ~(0xFF);
-    GPIOC->MODER |=  (0x55);
-    GPIOC->BSRR   = (1 << 3);     // Backlight ON
+    // PB0 (CS) output, start high (deselected)
+    GPIOB->MODER &= ~(3 << (0*2));
+    GPIOB->MODER |=  (1 << (0*2));
+    GPIOB->BSRR   =  (1 << 0);
 
-    // PB3, PB5 as AF0 for SPI1
-    GPIOB->MODER &= ~((3 << (3*2)) | (3 << (5*2)));
-    GPIOB->MODER |=  ((2 << (3*2)) | (2 << (5*2)));
-    GPIOB->AFR[0] &= ~((0xF << (3*4)) | (0xF << (5*4)));
+    // PC5 (RST) output, start high
+    GPIOC->MODER &= ~(3 << (5*2));
+    GPIOC->MODER |=  (1 << (5*2));
+    GPIOC->BSRR   =  (1 << 5);
 
-    // Joystick analog pins PA0, PA1
-    JOY_GPIO->MODER |= (3 << (0*2)) | (3 << (1*2));
-    JOY_GPIO->PUPDR &= ~((3 << (0*2)) | (3 << (1*2)));
+    // PA7 (DC) output
+    GPIOA->MODER &= ~(3 << (7*2));
+    GPIOA->MODER |=  (1 << (7*2));
 
-    // Joystick button PA4 input with pull-up
-    JOY_GPIO->MODER &= ~(3 << (JOY_BTN_PIN * 2));
-    JOY_GPIO->PUPDR &= ~(3 << (JOY_BTN_PIN * 2));
-    JOY_GPIO->PUPDR |=  (1 << (JOY_BTN_PIN * 2));
+    // PA6 (Backlight) output, start high (on)
+    GPIOA->MODER &= ~(3 << (6*2));
+    GPIOA->MODER |=  (1 << (6*2));
+    GPIOA->BSRR   =  (1 << 6);
+
+    // PC4 -> SPI1_SCK AF0
+    GPIOC->MODER &= ~(3 << (4*2));
+    GPIOC->MODER |=  (2 << (4*2));
+    GPIOC->AFR[0] &= ~(0xF << (4*4));
+
+    // PA5 -> SPI1_MOSI AF0
+    GPIOA->MODER &= ~(3 << (5*2));
+    GPIOA->MODER |=  (2 << (5*2));
+    GPIOA->AFR[0] &= ~(0xF << (5*4));
+
+    // PB10 (X-pos) analog, ADC ch11
+    GPIOB->MODER |=  (3 << (10*2));
+    GPIOB->PUPDR &= ~(3 << (10*2));
+
+    // PB2 (Y-pos) analog, ADC ch12
+    GPIOB->MODER |=  (3 << (2*2));
+    GPIOB->PUPDR &= ~(3 << (2*2));
+
+    // PB1 (Button) input with pull-up
+    GPIOB->MODER &= ~(3 << (JOY_BTN_PIN * 2));
+    GPIOB->PUPDR &= ~(3 << (JOY_BTN_PIN * 2));
+    GPIOB->PUPDR |=  (1 << (JOY_BTN_PIN * 2));
 
     // --- Shared TCS control pins: PA8, PA9, PA10, PA11, PA12 as outputs ---
     GPIOA->MODER &= ~((3 << (8*2))  |
@@ -170,7 +201,7 @@ static void GPIO_Init(void)
                       (3 << (11*2)) |
                       (3 << (12*2)));
 
-    // --- 9 TCS output pins as inputs ---
+    // --- 9 TCS output pins as digital inputs ---
 
     // PC6, PC7, PC8, PC9
     GPIOC->MODER &= ~((3 << (6*2)) |
@@ -195,6 +226,52 @@ static void GPIO_Init(void)
                       (3 << (13*2)) |
                       (3 << (14*2)) |
                       (3 << (15*2)));
+}
+
+void Motor_Init(void)
+{
+    // ------------------------------------------------------------------
+    // Microstepping mode pins: PA0=M0, PA1=M1, PA2=M2
+    // DRV8825 mode table:
+    //   M0  M1  M2  -> resolution
+    //   0   0   0   -> full step      (current setting)
+    //   1   0   0   -> half step
+    //   0   1   0   -> quarter step
+    //   1   1   0   -> eighth step
+    //   0   0   1   -> sixteenth step
+    //   1   0   1   -> thirty-second step
+    // Change the BSRR/BRR lines below to switch mode.
+    // ------------------------------------------------------------------
+    GPIOA->MODER &= ~((3 << (0*2)) | (3 << (1*2)) | (3 << (2*2)));
+    GPIOA->MODER |=  ((1 << (0*2)) | (1 << (1*2)) | (1 << (2*2)));
+
+    // Full step: M0=0, M1=0, M2=0
+    GPIOA->BRR = (1 << 0) | (1 << 1) | (1 << 2);
+
+    // ------------------------------------------------------------------
+    // Shared enable pin: PB9, output, start HIGH (disabled)
+    // DRV8825 EN is active LOW
+    // ------------------------------------------------------------------
+    MOTOR_EN_PORT->MODER &= ~(3 << (MOTOR_EN_PIN * 2));
+    MOTOR_EN_PORT->MODER |=  (1 << (MOTOR_EN_PIN * 2));
+    MOTOR_EN_PORT->BSRR   =  (1 << MOTOR_EN_PIN);
+
+    // ------------------------------------------------------------------
+    // STEP and DIR pins for all four axes
+    // ------------------------------------------------------------------
+    for (uint8_t i = 0; i < AXIS_COUNT; i++) {
+        const motor_pins_t *p = &motor_pins[i];
+
+        // STEP pin — output, start low
+        p->step_port->MODER &= ~(3 << (p->step_pin * 2));
+        p->step_port->MODER |=  (1 << (p->step_pin * 2));
+        p->step_port->BRR    =  (1 << p->step_pin);
+
+        // DIR pin — output, start low
+        p->dir_port->MODER &= ~(3 << (p->dir_pin * 2));
+        p->dir_port->MODER |=  (1 << (p->dir_pin * 2));
+        p->dir_port->BRR    =  (1 << p->dir_pin);
+    }
 }
 
 static void SPI1_Init(void)
@@ -260,9 +337,9 @@ void Joystick_Read(uint16_t *x, uint16_t *y, uint8_t *pressed)
 // ----------------------------------------------------
 static void LCD_Reset(void)
 {
-    GPIOC->BRR  = (1 << 1);
+    LCD_RST_GPIO->BRR  = (1 << LCD_RST_PIN);
     delay_cycles(100000);
-    GPIOC->BSRR = (1 << 1);
+    LCD_RST_GPIO->BSRR = (1 << LCD_RST_PIN);
     delay_cycles(100000);
 }
 

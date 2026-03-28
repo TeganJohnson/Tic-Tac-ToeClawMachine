@@ -17,6 +17,13 @@ extern void Display_ShowWinner(player_t winner);
 extern void Display_ShowDraw(void);
 extern void Hardware_ScanBoard(uint8_t scanned_board[9]);
 
+extern void Motor_Enable(void);
+extern void Motor_Disable(void);
+extern void Motor_MoveX(motor_dir_t dir, uint32_t steps);
+extern void Motor_MoveY(motor_dir_t dir, uint32_t steps);
+extern void Motor_MoveZ(motor_dir_t dir, uint32_t steps);
+extern void Motor_MoveClaw(motor_dir_t dir, uint32_t steps);
+
 // -----------------------------------------------------------------------------
 // Static game context
 // -----------------------------------------------------------------------------

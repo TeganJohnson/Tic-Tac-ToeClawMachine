@@ -8,7 +8,7 @@ extern void LCD_SetAddressWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t
 // ----------------------------------------------------
 // Utility
 // ----------------------------------------------------
-static void u16_to_str(uint16_t v, char *buf)
+void u16_to_str(uint16_t v, char *buf)
 {
     char tmp[6];
     int pos = 0;

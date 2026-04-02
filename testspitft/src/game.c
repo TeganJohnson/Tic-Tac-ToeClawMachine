@@ -1,6 +1,6 @@
 #include "game.h"
 #include "display.h"
-
+#include "motor.h"
 // -----------------------------------------------------------------------------
 // External functions from other files
 // These must NOT be static in the file where they are defined.

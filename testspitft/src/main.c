@@ -1,5 +1,7 @@
 #include "stm32f0xx.h"
 #include "game.h"
+#include "display.h"
+#include "motor.h"
 
 // LCD Pin Connections (STM32F091RC)
 // PB0  -> Chip Select (CS)
@@ -228,51 +230,6 @@ static void GPIO_Init(void)
                       (3 << (15*2)));
 }
 
-void Motor_Init(void)
-{
-    // ------------------------------------------------------------------
-    // Microstepping mode pins: PA0=M0, PA1=M1, PA2=M2
-    // DRV8825 mode table:
-    //   M0  M1  M2  -> resolution
-    //   0   0   0   -> full step      (current setting)
-    //   1   0   0   -> half step
-    //   0   1   0   -> quarter step
-    //   1   1   0   -> eighth step
-    //   0   0   1   -> sixteenth step
-    //   1   0   1   -> thirty-second step
-    // Change the BSRR/BRR lines below to switch mode.
-    // ------------------------------------------------------------------
-    GPIOA->MODER &= ~((3 << (0*2)) | (3 << (1*2)) | (3 << (2*2)));
-    GPIOA->MODER |=  ((1 << (0*2)) | (1 << (1*2)) | (1 << (2*2)));
-
-    // Full step: M0=0, M1=0, M2=0
-    GPIOA->BRR = (1 << 0) | (1 << 1) | (1 << 2);
-
-    // ------------------------------------------------------------------
-    // Shared enable pin: PB9, output, start HIGH (disabled)
-    // DRV8825 EN is active LOW
-    // ------------------------------------------------------------------
-    MOTOR_EN_PORT->MODER &= ~(3 << (MOTOR_EN_PIN * 2));
-    MOTOR_EN_PORT->MODER |=  (1 << (MOTOR_EN_PIN * 2));
-    MOTOR_EN_PORT->BSRR   =  (1 << MOTOR_EN_PIN);
-
-    // ------------------------------------------------------------------
-    // STEP and DIR pins for all four axes
-    // ------------------------------------------------------------------
-    for (uint8_t i = 0; i < AXIS_COUNT; i++) {
-        const motor_pins_t *p = &motor_pins[i];
-
-        // STEP pin — output, start low
-        p->step_port->MODER &= ~(3 << (p->step_pin * 2));
-        p->step_port->MODER |=  (1 << (p->step_pin * 2));
-        p->step_port->BRR    =  (1 << p->step_pin);
-
-        // DIR pin — output, start low
-        p->dir_port->MODER &= ~(3 << (p->dir_pin * 2));
-        p->dir_port->MODER |=  (1 << (p->dir_pin * 2));
-        p->dir_port->BRR    =  (1 << p->dir_pin);
-    }
-}
 
 static void SPI1_Init(void)
 {
@@ -493,6 +450,40 @@ void Hardware_ScanBoard(uint8_t scanned_board[9])
     }
 }
 
+void Joystick_Test(void)
+{
+    uint16_t x = 0, y = 0;
+    uint8_t pressed = 0;
+    char s[8];
+
+    // Clear a small area for the test UI
+    LCD_FillColor(COLOR_BLACK);
+    LCD_DrawString(10, 6, "Joystick Test", COLOR_YELLOW, COLOR_BLACK, 2);
+
+    while (1) {
+        Joystick_Read(&x, &y, &pressed);
+
+        // Draw X value
+        LCD_FillRect(10, 40, 100, 18, COLOR_BLACK);
+        u16_to_str(x, s);
+        LCD_DrawString(10, 40, "X:", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(36, 40, s, COLOR_WHITE, COLOR_BLACK, 2);
+
+        // Draw Y value
+        LCD_FillRect(10, 64, 100, 18, COLOR_BLACK);
+        u16_to_str(y, s);
+        LCD_DrawString(10, 64, "Y:", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(36, 64, s, COLOR_WHITE, COLOR_BLACK, 2);
+
+        // Draw button state
+        LCD_FillRect(10, 92, 180, 20, COLOR_BLACK);
+        if (pressed) LCD_DrawString(10, 92, "Button: PRESSED", COLOR_YELLOW, COLOR_BLACK, 2);
+        else LCD_DrawString(10, 92, "Button: released", COLOR_WHITE, COLOR_BLACK, 2);
+
+        delay_ms(120);
+    }
+}
+
 // ----------------------------------------------------
 // MAIN
 // ----------------------------------------------------
@@ -508,7 +499,6 @@ int main(void)
     Game_Init();
 
     while (1) {
-        Game_Update();
-        delay_ms(20);
+        Joystick_Test();
     }
 }

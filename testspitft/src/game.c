@@ -1,5 +1,6 @@
 #include "game.h"
 #include "display.h"
+#include "motor.h"
 
 // -----------------------------------------------------------------------------
 // External functions from other files

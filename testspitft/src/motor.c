@@ -79,26 +79,61 @@ void Motor_Disable(void)
     MOTOR_EN_PORT->BSRR = (1 << MOTOR_EN_PIN);   // HIGH = disabled
 }
  
-// -----------------------------------------------------------------------------
-// Motor_Step
-// Moves the given axis a number of steps in the given direction.
-// Blocking — returns when all steps are complete.
-// -----------------------------------------------------------------------------
-void Motor_Step(axis_t axis, motor_dir_t dir, uint32_t steps)
+//Motor_Step, currently is blocking.
+//takes up to 2 axis and moves them the given number of steps.
+//unused axis should be input as 2
+void Motor_Step2(axis_t axis1, axis_t axis2, motor_dir_t dir, uint32_t steps)
 {
-    if (axis >= AXIS_COUNT || steps == 0) return;
+    if (axis1 >= AXIS_COUNT || axis2 >= AXIS_COUNT || steps == 0) return;
  
-    const motor_pins_t *p = &motor_pins[axis];
+    const motor_pins_t *p1 = &motor_pins[axis1];
+
+    const motor_pins_t *p2 = &motor_pins[axis2];
+
+    if (dir == DIR_FORWARD) {
+    p2->dir_port->BSRR = (1 << p2->dir_pin);   // HIGH
+    } else {
+    p2->dir_port->BRR  = (1 << p2->dir_pin);   // LOW
+    }
+        
+    if (dir == DIR_FORWARD) {
+    p1->dir_port->BSRR = (1 << p1->dir_pin);   // HIGH
+    } else {
+    p1->dir_port->BRR  = (1 << p1->dir_pin);   // LOW
+    }
+
+    //delay for DRV8825 setup
+    delay_us(2);
  
-    // Set direction
+    for (uint32_t i = 0; i < steps; i++) {
+        // Pulse STEP high
+        p1->step_port->BSRR = (1 << p1->step_pin);
+        p2->step_port->BSRR = (1 << p2->step_pin);
+        delay_us(MOTOR_PULSE_US);
+ 
+        // Pulse STEP low
+        p1->step_port->BRR  = (1 << p1->step_pin);
+
+        p2->step_port->BRR  = (1 << p2->step_pin);
+        delay_us(MOTOR_STEP_DELAY_US);
+    }
+    }
+
+
+void Motor_Step(axis_t axis1, motor_dir_t dir, uint32_t steps)
+{
+    if (axis1 >= AXIS_COUNT || steps == 0) return;
+ 
+    const motor_pins_t *p = &motor_pins[axis1];
+ 
+    //set direction
     if (dir == DIR_FORWARD) {
         p->dir_port->BSRR = (1 << p->dir_pin);   // HIGH
     } else {
         p->dir_port->BRR  = (1 << p->dir_pin);   // LOW
     }
- 
-    // DRV8825 requires a minimum 650ns setup time after DIR change before
-    // the first STEP pulse. A short delay here covers that.
+
+    //delay for DRV8825 setup
     delay_us(2);
  
     for (uint32_t i = 0; i < steps; i++) {
@@ -112,9 +147,7 @@ void Motor_Step(axis_t axis, motor_dir_t dir, uint32_t steps)
     }
 }
  
-// -----------------------------------------------------------------------------
-// Convenience wrappers
-// -----------------------------------------------------------------------------
+//wrappers
 void Motor_MoveX(motor_dir_t dir, uint32_t steps)
 {
     Motor_Step(AXIS_X, dir, steps);
@@ -135,3 +168,6 @@ void Motor_MoveClaw(motor_dir_t dir, uint32_t steps)
     Motor_Step(AXIS_CLAW, dir, steps);
 }
  
+void Motor_MoveXZ(motor_dir_t dir, uint32_t steps) {
+    Motor_Step2(AXIS_Z, AXIS_X, dir, steps);
+}

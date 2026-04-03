@@ -3,6 +3,7 @@
 #include "motor.h"
 #include "display.h"
 
+
 // LCD Pin Connections (STM32F091RC)
 // PB0  -> Chip Select (CS)
 // PC5  -> Reset (RST)
@@ -26,6 +27,10 @@
 #define JOY_X_CHANNEL   ADC_CHSELR_CHSEL0  // PB10 -> ADC channel 11 PA0 - 0
 #define JOY_Y_CHANNEL   ADC_CHSELR_CHSEL1  // PB2  -> ADC channel 12 (if wired, else verify) PA1 - 1
 
+//Ticks for the display interrupt
+volatile uint32_t msTicks10 = 0;
+volatile uint32_t count_flag = 0;
+
 // ----------------------------------------------------
 // Delay
 // ----------------------------------------------------
@@ -33,6 +38,8 @@ static void delay_cycles(volatile uint32_t cycles)
 {
     while (cycles--) __NOP();
 }
+
+
 
 // ----------------------------------------------------
 // SysTick Timer (1ms interrupt)
@@ -229,52 +236,6 @@ static void GPIO_Init(void)
                       (3 << (14*2)) |
                       (3 << (15*2)));
 }
-
-// void Motor_Init(void)
-// {
-//     // ------------------------------------------------------------------
-//     // Microstepping mode pins: PA0=M0, PA1=M1, PA2=M2
-//     // DRV8825 mode table:
-//     //   M0  M1  M2  -> resolution
-//     //   0   0   0   -> full step      (current setting)
-//     //   1   0   0   -> half step
-//     //   0   1   0   -> quarter step
-//     //   1   1   0   -> eighth step
-//     //   0   0   1   -> sixteenth step
-//     //   1   0   1   -> thirty-second step
-//     // Change the BSRR/BRR lines below to switch mode.
-//     // ------------------------------------------------------------------
-//     GPIOA->MODER &= ~((3 << (0*2)) | (3 << (1*2)) | (3 << (2*2)));
-//     GPIOA->MODER |=  ((1 << (0*2)) | (1 << (1*2)) | (1 << (2*2)));
-
-//     // Full step: M0=0, M1=0, M2=0
-//     GPIOA->BRR = (1 << 0) | (1 << 1) | (1 << 2);
-
-//     // ------------------------------------------------------------------
-//     // Shared enable pin: PB9, output, start HIGH (disabled)
-//     // DRV8825 EN is active LOW
-//     // ------------------------------------------------------------------
-//     MOTOR_EN_PORT->MODER &= ~(3 << (MOTOR_EN_PIN * 2));
-//     MOTOR_EN_PORT->MODER |=  (1 << (MOTOR_EN_PIN * 2));
-//     MOTOR_EN_PORT->BSRR   =  (1 << MOTOR_EN_PIN);
-
-//     // ------------------------------------------------------------------
-//     // STEP and DIR pins for all four axes
-//     // ------------------------------------------------------------------
-//     for (uint8_t i = 0; i < AXIS_COUNT; i++) {
-//         const motor_pins_t *p = &motor_pins[i];
-
-//         // STEP pin — output, start low
-//         p->step_port->MODER &= ~(3 << (p->step_pin * 2));
-//         p->step_port->MODER |=  (1 << (p->step_pin * 2));
-//         p->step_port->BRR    =  (1 << p->step_pin);
-
-//         // DIR pin — output, start low
-//         p->dir_port->MODER &= ~(3 << (p->dir_pin * 2));
-//         p->dir_port->MODER |=  (1 << (p->dir_pin * 2));
-//         p->dir_port->BRR    =  (1 << p->dir_pin);
-//     }
-// }
 
 static void SPI1_Init(void)
 {
@@ -525,7 +486,7 @@ void Joystick_and_Motor_Test(void)
     uint16_t x = 0, y = 0;
     uint8_t pressed = 0;
 
-    while (1) {
+    // while (1) {
         Joystick_Read(&x, &y, &pressed);
 
         if (x > y && x > 3000) {
@@ -543,7 +504,7 @@ void Joystick_and_Motor_Test(void)
         
 
         // delay_ms(0.001);
-    }
+    // }
 }
 
 static cell_state_t TCS_ClassifySensor(uint8_t sensor_index)
@@ -569,6 +530,32 @@ void Hardware_ScanBoard(uint8_t scanned_board[9])
     }
 }
 
+void tim3_init(void) {
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+    TIM3->PSC = 8000 - 1;
+    TIM3->ARR = 9;
+    TIM3->EGR = TIM_EGR_UG;
+    TIM3->SR &= ~TIM_SR_UIF;
+    TIM3->DIER |= TIM_DIER_UIE;
+    NVIC_EnableIRQ(TIM3_IRQn);
+    TIM3->CR1 |= TIM_CR1_CEN;
+}
+
+void TIM3_IRQHandler(void) {
+    if (TIM3->SR & TIM_SR_UIF)
+    {
+        TIM3->SR &= ~TIM_SR_UIF;
+        
+        msTicks10++;
+    
+        if (msTicks10 >= 100)
+        {
+            msTicks10 = 0;
+            count_flag = 1;
+        }
+    }
+}
+
 // ----------------------------------------------------
 // MAIN
 // ----------------------------------------------------
@@ -583,6 +570,10 @@ int main(void)
     Motor_Init();
 
     Game_Init();
+    tim3_init();
+
+    uint16_t time_left = 60;
+
 
     delay_ms(20);
     gpio_pullup(GPIOB, 10);
@@ -596,9 +587,24 @@ int main(void)
     delay_ms(20);
     Motor_Enable();
     delay_ms(20);
+    char s[8];
 
     while (1) {
         Joystick_and_Motor_Test();
         // Motor_MoveXZ(1,1000);
+        if (count_flag) {
+
+            count_flag = 0;
+            if (time_left > 0) {
+                time_left--;
+            }
+            else {
+                time_left = 60;
+            }
+            u16_to_str(time_left, s);
+            // LCD_FillRect(10, 64, 100, 18, COLOR_BLACK);
+            LCD_DrawString(10, 100, s, COLOR_BLACK, COLOR_WHITE, 4);
+            
+        }
     }
 }

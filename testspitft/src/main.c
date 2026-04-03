@@ -472,6 +472,12 @@ static cell_state_t classify_color_from_counts(uint32_t cR, uint32_t cG, uint32_
     return CELL_UNKNOWN;
 }
 
+void gpio_pullup(GPIO_TypeDef *port, uint8_t pin) {
+    port->MODER &= ~(3 << (pin * 2));
+    port->PUPDR &= ~(3 << (pin * 2));
+    port->PUPDR |= (1 << (pin * 2));
+
+}
 
 void Joystick_Test(void)
 {
@@ -503,7 +509,40 @@ void Joystick_Test(void)
         if (pressed) LCD_DrawString(10, 92, "Button: PRESSED", COLOR_YELLOW, COLOR_BLACK, 2);
         else LCD_DrawString(10, 92, "Button: released", COLOR_WHITE, COLOR_BLACK, 2);
 
-        delay_ms(120);
+        if (x > y && x > 3000) {
+            Motor_Step(AXIS_X, DIR_FORWARD, 10);
+        }
+        if (y > x && y > 3000) {
+            Motor_Step(AXIS_Y, DIR_FORWARD, 10);
+        }
+
+        delay_ms(1);
+    }
+}
+
+void Joystick_and_Motor_Test(void)
+{
+    uint16_t x = 0, y = 0;
+    uint8_t pressed = 0;
+
+    while (1) {
+        Joystick_Read(&x, &y, &pressed);
+
+        if (x > y && x > 3000) {
+            Motor_Step(AXIS_X, DIR_FORWARD, 10);
+        }
+        else if (y > x && y > 3000) {
+            Motor_Step(AXIS_Y, DIR_FORWARD, 10);
+        }
+        else if (x < y && x < 1500) {
+            Motor_Step(AXIS_X, DIR_BACKWARD, 10);
+        }
+        else if (y < x && y < 1500) {
+            Motor_Step(AXIS_Y, DIR_BACKWARD, 10);
+        }
+        
+
+        // delay_ms(0.001);
     }
 }
 
@@ -541,10 +580,25 @@ int main(void)
     LCD_Init();
     Joystick_ADC_Init();
     TCS_Init();
+    Motor_Init();
 
     Game_Init();
 
+    delay_ms(20);
+    gpio_pullup(GPIOB, 10);
+    gpio_pullup(GPIOB, 11);
+    gpio_pullup(GPIOB, 12);
+
+    gpio_pullup(GPIOA, 11);
+    gpio_pullup(GPIOA, 12);
+    gpio_pullup(GPIOA, 10);
+
+    delay_ms(20);
+    Motor_Enable();
+    delay_ms(20);
+
     while (1) {
-        Joystick_Test();
+        Joystick_and_Motor_Test();
+        // Motor_MoveXZ(1,1000);
     }
 }

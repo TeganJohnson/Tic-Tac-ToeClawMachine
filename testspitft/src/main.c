@@ -23,8 +23,8 @@
 #define JOY_GPIO        GPIOB
 #define JOY_BTN_PIN     1
 
-#define JOY_X_CHANNEL   ADC_CHSELR_CHSEL11  // PB10 -> ADC channel 11
-#define JOY_Y_CHANNEL   ADC_CHSELR_CHSEL12  // PB2  -> ADC channel 12 (if wired, else verify)
+#define JOY_X_CHANNEL   ADC_CHSELR_CHSEL0  // PB10 -> ADC channel 11 PA0 - 0
+#define JOY_Y_CHANNEL   ADC_CHSELR_CHSEL1  // PB2  -> ADC channel 12 (if wired, else verify) PA1 - 1
 
 // ----------------------------------------------------
 // Delay
@@ -171,13 +171,13 @@ static void GPIO_Init(void)
     GPIOA->MODER |=  (2 << (7*2));
     GPIOA->AFR[0] &= ~(0xF << (7*4));
 
-    // PB10 (X-pos) analog, ADC ch11
-    GPIOB->MODER |=  (3 << (10*2));
-    GPIOB->PUPDR &= ~(3 << (10*2));
+    // PB10 (X-pos) analog, ADC ch11 not PA0
+    GPIOA->MODER |=  (3 << (0*2));
+    GPIOA->PUPDR &= ~(3 << (0*2));
 
-    // PB2 (Y-pos) analog, ADC ch12
-    GPIOB->MODER |=  (3 << (2*2));
-    GPIOB->PUPDR &= ~(3 << (2*2));
+    // PB2 (Y-pos) analog, ADC ch12 now PA1
+    GPIOA->MODER |=  (3 << (1*2));
+    GPIOA->PUPDR &= ~(3 << (1*2));
 
     // PB1 (Button) input with pull-up
     GPIOB->MODER &= ~(3 << (JOY_BTN_PIN * 2));

@@ -36,6 +36,15 @@ static const motor_pins_t motor_pins[AXIS_COUNT] = {
     [AXIS_Z]    = { GPIOC, 3,  GPIOC, 0  },
     [AXIS_CLAW] = { GPIOC, 10, GPIOA, 15 },
 };
+
+// -----------------------------------------------------------------------------
+//A helper function for Motor_Init
+// -----------------------------------------------------------------------------
+void gpio_pullup(GPIO_TypeDef *port, uint8_t pin) {
+    port->MODER &= ~(3 << (pin * 2));
+    port->PUPDR &= ~(3 << (pin * 2));
+    port->PUPDR |= (1 << (pin * 2));
+}
  
 // -----------------------------------------------------------------------------
 // Motor_Init
@@ -44,6 +53,13 @@ static const motor_pins_t motor_pins[AXIS_COUNT] = {
 // -----------------------------------------------------------------------------
 void Motor_Init(void)
 {
+    gpio_pullup(GPIOB, 10);
+    gpio_pullup(GPIOB, 11);
+    gpio_pullup(GPIOB, 12);
+
+    gpio_pullup(GPIOA, 11);
+    gpio_pullup(GPIOA, 12);
+    gpio_pullup(GPIOA, 10);
     // Enable pin — PB9 output, start HIGH (disabled)
     MOTOR_EN_PORT->MODER &= ~(3 << (MOTOR_EN_PIN * 2));
     MOTOR_EN_PORT->MODER |=  (1 << (MOTOR_EN_PIN * 2));

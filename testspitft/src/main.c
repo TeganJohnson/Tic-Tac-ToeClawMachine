@@ -26,6 +26,13 @@
 #define JOY_X_CHANNEL   ADC_CHSELR_CHSEL0  // PB10 -> ADC channel 11 PA0 - 0
 #define JOY_Y_CHANNEL   ADC_CHSELR_CHSEL1  // PB2  -> ADC channel 12 (if wired, else verify) PA1 - 1
 
+#define X_LIMIT_GPIO    GPIOA
+#define X_LIMIT_PIN     11
+
+#define XLIM_NONE     0
+#define XLIM_POS      1
+#define XLIM_NEG      2
+
 // ----------------------------------------------------
 // Delay
 // ----------------------------------------------------
@@ -472,13 +479,6 @@ static cell_state_t classify_color_from_counts(uint32_t cR, uint32_t cG, uint32_
     return CELL_UNKNOWN;
 }
 
-void gpio_pullup(GPIO_TypeDef *port, uint8_t pin) {
-    port->MODER &= ~(3 << (pin * 2));
-    port->PUPDR &= ~(3 << (pin * 2));
-    port->PUPDR |= (1 << (pin * 2));
-
-}
-
 void Joystick_Test(void)
 {
     uint16_t x = 0, y = 0;
@@ -520,27 +520,55 @@ void Joystick_Test(void)
     }
 }
 
+
+void X_Limit_Checker(uint8_t dir, uint8_t *xlim_prev) {
+    uint8_t xlim_current;
+
+    xlim_current = ((X_LIMIT_GPIO->IDR & (1 << X_LIMIT_PIN)) == 0);
+
+    if (!xlim_current && *xlim_prev) {
+        *xlim_prev = XLIM_NONE;
+    }
+
+    else if (xlim_current && dir == DIR_FORWARD && !*xlim_prev) {
+        *xlim_prev = XLIM_POS;
+    }
+
+    else if (xlim_current && dir == DIR_BACKWARD && !*xlim_prev) {
+        *xlim_prev = XLIM_NEG;
+    }
+}
+
 void Joystick_and_Motor_Test(void)
 {
     uint16_t x = 0, y = 0;
     uint8_t pressed = 0;
+    uint8_t dir = 0;
+    uint8_t xlim = 0;
 
     while (1) {
+        X_Limit_Checker(dir,&xlim);
         Joystick_Read(&x, &y, &pressed);
 
-        if (x > y && x > 3000) {
+        if (x > y && x > 3000 && xlim != XLIM_POS) {
             Motor_Step(AXIS_X, DIR_FORWARD, 10);
+            dir = DIR_FORWARD;
         }
         else if (y > x && y > 3000) {
             Motor_Step(AXIS_Y, DIR_FORWARD, 10);
+            dir = DIR_FORWARD;
         }
-        else if (x < y && x < 1500) {
+        else if (x < y && x < 1500 && xlim != XLIM_NEG) {
             Motor_Step(AXIS_X, DIR_BACKWARD, 10);
+            dir = DIR_BACKWARD;
         }
         else if (y < x && y < 1500) {
             Motor_Step(AXIS_Y, DIR_BACKWARD, 10);
+            dir = DIR_BACKWARD;
         }
-        
+        else if (pressed) {
+            Motor_Step(AXIS_Z, DIR_FORWARD, 10);
+        }
 
         // delay_ms(0.001);
     }
@@ -585,13 +613,6 @@ int main(void)
     Game_Init();
 
     delay_ms(20);
-    gpio_pullup(GPIOB, 10);
-    gpio_pullup(GPIOB, 11);
-    gpio_pullup(GPIOB, 12);
-
-    gpio_pullup(GPIOA, 11);
-    gpio_pullup(GPIOA, 12);
-    gpio_pullup(GPIOA, 10);
 
     delay_ms(20);
     Motor_Enable();

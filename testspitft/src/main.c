@@ -609,17 +609,11 @@ int main(void)
     Joystick_ADC_Init();
     TCS_Init();
     Motor_Init();
-
     Game_Init();
-
-    delay_ms(20);
-
-    delay_ms(20);
     Motor_Enable();
     delay_ms(20);
-
-    while (1) {
-        Joystick_and_Motor_Test();
-        // Motor_MoveXZ(1,1000);
+    
+    while(1) {
+        Game_Update();
     }
 }

@@ -14,8 +14,10 @@
 // -----------------------------------------------------------------------------
 typedef enum {
     STATE_IDLE = 0,
-    STATE_PLAYER1_TURN,
-    STATE_PLAYER2_TURN,
+    STATE_PLAYER1_TURN_GRAB,
+    STATE_PLAYER2_TURN_GRAB,
+    STATE_PLAYER1_TURN_DROP,
+    STATE_PLAYER2_TURN_DROP,
     STATE_CHECK_BOARD,
     STATE_PLAYER1_WIN,
     STATE_PLAYER2_WIN,
@@ -46,6 +48,7 @@ typedef struct {
 // -----------------------------------------------------------------------------
 void Game_Init(void);
 void Game_Update(void);
+static void Game_ChangeState(game_state_t new_state);
 
 game_state_t Game_GetState(void);
 player_t Game_GetActivePlayer(void);

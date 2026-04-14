@@ -184,6 +184,9 @@ void Display_ShowIdleScreen(void)
     LCD_DrawString(60, 230, "TO START", COLOR_WHITE, COLOR_BLACK, 2);
 }
 
+
+//TODO:
+//Make sure function is only taking processing time when actively updating each second.
 void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms)
 {
     LCD_FillColor(COLOR_BLACK);

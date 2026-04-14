@@ -2,10 +2,28 @@
  
 // -----------------------------------------------------------------------------
 // External timing functions from main.c
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 extern uint32_t millis(void);
 extern void delay_ms(uint32_t ms);
- 
+
+// -----------------------------------------------------------------------------
+// Number of Steps to Lower/Raise to/from the Play Area
+// -----------------------------------------------------------------------------
+#define LOWER_STEPS 100
+#define RAISE_STEPS 100
+
+// -----------------------------------------------------------------------------
+// Number of Steps to Close/Open the Claw
+// -----------------------------------------------------------------------------
+#define CLOSE_STEPS 10
+#define OPEN_STEPS 10 
+
+// -----------------------------------------------------------------------------
+// Number of Steps to Set the Drop Height
+// -----------------------------------------------------------------------------
+#define DROP_STEPS 0
+#define DROP_RAISE_STEPS 0
+
 // -----------------------------------------------------------------------------
 // Microsecond busy-wait
 // Assumes 8MHz system clock. Adjust cycle count if clock changes.
@@ -45,6 +63,7 @@ void gpio_pullup(GPIO_TypeDef *port, uint8_t pin) {
     port->PUPDR &= ~(3 << (pin * 2));
     port->PUPDR |= (1 << (pin * 2));
 }
+
  
 // -----------------------------------------------------------------------------
 // Motor_Init
@@ -95,7 +114,7 @@ void Motor_Disable(void)
     MOTOR_EN_PORT->BSRR = (1 << MOTOR_EN_PIN);   // HIGH = disabled
 }
  
-//Motor_Step, currently is blocking.
+//Motor_Step2, currently is blocking.
 //takes up to 2 axis and moves them the given number of steps.
 //unused axis should be input as 2
 void Motor_Step2(axis_t axis1, axis_t axis2, motor_dir_t dir, uint32_t steps)
@@ -160,6 +179,24 @@ void Motor_Step(axis_t axis1, motor_dir_t dir, uint32_t steps)
         // Pulse STEP low
         p->step_port->BRR  = (1 << p->step_pin);
         delay_us(MOTOR_STEP_DELAY_US);
+    }
+}
+
+void Claw_Grab_Token(void) {
+    Motor_Movez(DIR_FORWARD, LOWER_STEPS);
+    Motor_MoveClaw(DIR_FORWARD, CLOSE_STEPS);
+    Motor_Movez(DIR_BACKWARD, RAISE_STEPS);
+}
+
+void Claw_Drop_Token(void) {
+    if (DROP_STEPS != 0) {
+        Motor_Movez(DIR_FORWARD, DROP_STEPS);
+    }
+
+    Motor_MoveCLaw(DIR_BACKWARD, OPEN_STEPS);
+
+    if (DROP_STEPS != 0) {
+        Motor_Movez(DIR_FORWARD, DROP_RAISE_STEPS);
     }
 }
  

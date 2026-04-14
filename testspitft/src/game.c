@@ -154,11 +154,11 @@ void X_Limit_Checker(uint8_t dir, uint8_t *xlim_prev)
 // -----------------------------------------------------------------------------
 // Update Claw Movemenet From Joystick Input
 // -----------------------------------------------------------------------------
+static uint8_t dir = 0;
+static uint8_t xlim = 0;
+
 static void Claw_UpdateFromJoystick(uint16_t x, uint16_t y)
 {
-    uint16_t x = 0, y = 0;
-    uint8_t dir = 0;
-    uint8_t xlim = 0;
 
     X_Limit_Checker(dir, &xlim);
 
@@ -282,7 +282,12 @@ static void Handle_PlayerTurnState_Grab(void)
     {
         Claw_Grab_Token();
 
-        Game_ChangeState(STATE_CHECK_BOARD);
+        if (game.active_player == PLAYER_1) {
+            Game_ChangeState(STATE_PLAYER1_TURN_DROP);
+        }
+        else if (game.active_player == PLAYER_2) {
+            Game_ChangeState(STATE_PLAYER2_TURN_DROP);
+        }
     }
 }
 

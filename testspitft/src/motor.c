@@ -183,20 +183,20 @@ void Motor_Step(axis_t axis1, motor_dir_t dir, uint32_t steps)
 }
 
 void Claw_Grab_Token(void) {
-    Motor_Movez(DIR_FORWARD, LOWER_STEPS);
+    Motor_MoveZ(DIR_FORWARD, LOWER_STEPS);
     Motor_MoveClaw(DIR_FORWARD, CLOSE_STEPS);
-    Motor_Movez(DIR_BACKWARD, RAISE_STEPS);
+    Motor_MoveZ(DIR_BACKWARD, RAISE_STEPS);
 }
 
 void Claw_Drop_Token(void) {
     if (DROP_STEPS != 0) {
-        Motor_Movez(DIR_FORWARD, DROP_STEPS);
+        Motor_MoveZ(DIR_FORWARD, DROP_STEPS);
     }
 
-    Motor_MoveCLaw(DIR_BACKWARD, OPEN_STEPS);
+    Motor_MoveClaw(DIR_BACKWARD, OPEN_STEPS);
 
     if (DROP_STEPS != 0) {
-        Motor_Movez(DIR_FORWARD, DROP_RAISE_STEPS);
+        Motor_MoveZ(DIR_FORWARD, DROP_RAISE_STEPS);
     }
 }
  

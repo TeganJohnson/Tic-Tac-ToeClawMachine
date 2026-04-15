@@ -38,6 +38,11 @@ extern void Motor_MoveClaw(motor_dir_t dir, uint32_t steps);
 static game_context_t game;
 
 // -----------------------------------------------------------------------------
+// Time Remaining Value for Comparison
+// -----------------------------------------------------------------------------
+static uint32_t remaining_prev = PLAYER_TURN_TIME_MS;
+
+// -----------------------------------------------------------------------------
 // Winning line lookup table
 // -----------------------------------------------------------------------------
 static const uint8_t win_lines[8][3] = {
@@ -187,6 +192,7 @@ static void Claw_UpdateFromJoystick(uint16_t x, uint16_t y)
 // -----------------------------------------------------------------------------
 // State transition helper
 // -----------------------------------------------------------------------------
+static uint8_t Idle_IsDisplayed = 0;
 static void Game_ChangeState(game_state_t new_state)
 {
     game.current_state = new_state;
@@ -195,15 +201,30 @@ static void Game_ChangeState(game_state_t new_state)
     switch (new_state)
     {
     case STATE_IDLE:
+        Idle_IsDisplayed = 0;
         Display_ShowIdleScreen();
         break;
 
     case STATE_PLAYER1_TURN_GRAB:
+        remaining_prev = PLAYER_TURN_TIME_MS;
         game.active_player = PLAYER_1;
         Display_ShowPlayerTurn(PLAYER_1, PLAYER_TURN_TIME_MS);
         break;
 
     case STATE_PLAYER2_TURN_GRAB:
+        remaining_prev = PLAYER_TURN_TIME_MS;
+        game.active_player = PLAYER_2;
+        Display_ShowPlayerTurn(PLAYER_2, PLAYER_TURN_TIME_MS);
+        break;
+
+    case STATE_PLAYER1_TURN_DROP:
+        remaining_prev = PLAYER_TURN_TIME_MS;
+        game.active_player = PLAYER_1;
+        Display_ShowPlayerTurn(PLAYER_1, PLAYER_TURN_TIME_MS);
+        break;
+
+    case STATE_PLAYER2_TURN_DROP:
+        remaining_prev = PLAYER_TURN_TIME_MS;
         game.active_player = PLAYER_2;
         Display_ShowPlayerTurn(PLAYER_2, PLAYER_TURN_TIME_MS);
         break;
@@ -237,7 +258,9 @@ static void Handle_IdleState(void)
 {
     uint16_t jx, jy;
     uint8_t pressed;
-    Display_ShowIdleScreen();
+    if (!Idle_IsDisplayed) {
+        Display_ShowIdleScreen();
+    }
     Joystick_Read(&jx, &jy, &pressed);
 
     if (pressed)
@@ -248,6 +271,7 @@ static void Handle_IdleState(void)
         delay_ms(200);
     }
 }
+
 
 static void Handle_PlayerTurnState_Grab(void)
 {
@@ -261,7 +285,10 @@ static void Handle_PlayerTurnState_Grab(void)
     Joystick_Read(&jx, &jy, &pressed);
     Claw_UpdateFromJoystick(jx, jy);
 
-    Display_ShowPlayerTurn(game.active_player, remaining);
+    if ((remaining_prev - remaining) > 1000) {
+        Display_ShowPlayerTurn(game.active_player, remaining);
+        remaining_prev = remaining;
+    }
 
     if (pressed)
     {
@@ -303,7 +330,10 @@ static void Handle_PlayerTurnState_Drop(void)
     Joystick_Read(&jx, &jy, &pressed);
     Claw_UpdateFromJoystick(jx, jy);
 
-    Display_ShowPlayerTurn(game.active_player, remaining);
+    if ((remaining_prev - remaining) > 1000) {
+        Display_ShowPlayerTurn(game.active_player, remaining);
+        remaining_prev = remaining;
+    }
 
     if (pressed)
     {

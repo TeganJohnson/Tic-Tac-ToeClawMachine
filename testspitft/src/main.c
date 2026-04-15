@@ -521,50 +521,25 @@ void Joystick_Test(void)
 }
 
 
-void X_Limit_Checker(uint8_t dir, uint8_t *xlim_prev) {
-    uint8_t xlim_current;
-
-    xlim_current = ((X_LIMIT_GPIO->IDR & (1 << X_LIMIT_PIN)) == 0);
-
-    if (!xlim_current && *xlim_prev) {
-        *xlim_prev = XLIM_NONE;
-    }
-
-    else if (xlim_current && dir == DIR_FORWARD && !*xlim_prev) {
-        *xlim_prev = XLIM_POS;
-    }
-
-    else if (xlim_current && dir == DIR_BACKWARD && !*xlim_prev) {
-        *xlim_prev = XLIM_NEG;
-    }
-}
-
 void Joystick_and_Motor_Test(void)
 {
     uint16_t x = 0, y = 0;
     uint8_t pressed = 0;
-    uint8_t dir = 0;
-    uint8_t xlim = 0;
 
     while (1) {
-        X_Limit_Checker(dir,&xlim);
         Joystick_Read(&x, &y, &pressed);
 
-        if (x > y && x > 3000 && xlim != XLIM_POS) {
+        if (x > y && x > 3000) {
             Motor_Step(AXIS_X, DIR_FORWARD, 10);
-            dir = DIR_FORWARD;
         }
         else if (y > x && y > 3000) {
             Motor_Step(AXIS_Y, DIR_FORWARD, 10);
-            dir = DIR_FORWARD;
         }
-        else if (x < y && x < 1500 && xlim != XLIM_NEG) {
+        else if (x < y && x < 1500) {
             Motor_Step(AXIS_X, DIR_BACKWARD, 10);
-            dir = DIR_BACKWARD;
         }
         else if (y < x && y < 1500) {
             Motor_Step(AXIS_Y, DIR_BACKWARD, 10);
-            dir = DIR_BACKWARD;
         }
         else if (pressed) {
             Motor_Step(AXIS_Z, DIR_FORWARD, 10);

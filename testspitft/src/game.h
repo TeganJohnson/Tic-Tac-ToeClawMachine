@@ -48,7 +48,6 @@ typedef struct {
 // -----------------------------------------------------------------------------
 void Game_Init(void);
 void Game_Update(void);
-static void Game_ChangeState(game_state_t new_state);
 
 game_state_t Game_GetState(void);
 player_t Game_GetActivePlayer(void);

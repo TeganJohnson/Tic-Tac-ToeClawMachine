@@ -22,7 +22,7 @@ void LCD_DrawStringCentered(const char *str, uint16_t color, uint16_t bg, uint8_
 void LCD_DrawString(uint16_t x, uint16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t scale);
 
 void Display_ShowIdleScreen(void);
-void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms);
+void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms, uint8_t bg);
 void Display_ShowCheckingBoard(void);
 void Display_ShowWinner(player_t winner);
 void Display_ShowDraw(void);

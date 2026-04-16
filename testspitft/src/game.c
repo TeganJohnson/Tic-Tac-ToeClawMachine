@@ -12,7 +12,7 @@ extern void delay_ms(uint32_t ms);
 extern void Joystick_Read(uint16_t *x, uint16_t *y, uint8_t *pressed);
 
 extern void Display_ShowIdleScreen(void);
-extern void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms);
+extern void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms, uint8_t bg);
 extern void Display_ShowCheckingBoard(void);
 extern void Display_ShowWinner(player_t winner);
 extern void Display_ShowDraw(void);
@@ -28,9 +28,12 @@ extern void Motor_MoveClaw(motor_dir_t dir, uint32_t steps);
 #define X_LIMIT_GPIO GPIOA
 #define X_LIMIT_PIN 11
 
-#define XLIM_NONE 0
-#define XLIM_POS 1
-#define XLIM_NEG 2
+#define Y_LIMIT_GPIO GPIOA
+#define Y_LIMIT_PIN 10
+
+#define LIM_NONE 0
+#define LIM_POS 1
+#define LIM_NEG 2
 
 // -----------------------------------------------------------------------------
 // Static game context
@@ -40,7 +43,7 @@ static game_context_t game;
 // -----------------------------------------------------------------------------
 // Time Remaining Value for Comparison
 // -----------------------------------------------------------------------------
-static uint32_t remaining_prev = PLAYER_TURN_TIME_MS;
+static uint8_t remaining_prev_sec = 0xFF;
 
 // -----------------------------------------------------------------------------
 // Winning line lookup table
@@ -135,6 +138,9 @@ static void Board_UpdateFromScan(void)
     Board_RecountMoves();
 }
 
+// -----------------------------------------------------------------------------
+// A Helper Function to Determine if the X-Limit has been Reached and in which Direction
+// -----------------------------------------------------------------------------
 void X_Limit_Checker(uint8_t dir, uint8_t *xlim_prev)
 {
     uint8_t xlim_current;
@@ -143,49 +149,78 @@ void X_Limit_Checker(uint8_t dir, uint8_t *xlim_prev)
 
     if (!xlim_current && *xlim_prev)
     {
-        *xlim_prev = XLIM_NONE;
+        *xlim_prev = LIM_NONE;
     }
 
     else if (xlim_current && dir == DIR_FORWARD && !*xlim_prev)
     {
-        *xlim_prev = XLIM_POS;
+        *xlim_prev = LIM_POS;
     }
 
     else if (xlim_current && dir == DIR_BACKWARD && !*xlim_prev)
     {
-        *xlim_prev = XLIM_NEG;
+        *xlim_prev = LIM_NEG;
     }
 }
+
+// -----------------------------------------------------------------------------
+// A Helper Function to Determine if the Y-Limit has been Reached and in which Direction
+// -----------------------------------------------------------------------------
+void Y_Limit_Checker(uint8_t dir, uint8_t *ylim_prev)
+{
+    uint8_t ylim_current;
+
+    ylim_current = ((Y_LIMIT_GPIO->IDR & (1 << Y_LIMIT_PIN)) == 0);
+
+    if (!ylim_current && *ylim_prev)
+    {
+        *ylim_prev = LIM_NONE;
+    }
+
+    else if (ylim_current && dir == DIR_FORWARD && !*ylim_prev)
+    {
+        *ylim_prev = LIM_POS;
+    }
+
+    else if (ylim_current && dir == DIR_BACKWARD && !*ylim_prev)
+    {
+        *ylim_prev = LIM_NEG;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // Update Claw Movemenet From Joystick Input
 // -----------------------------------------------------------------------------
-static uint8_t dir = 0;
+static uint8_t xdir = 0;
+static uint8_t ydir = 0;
 static uint8_t xlim = 0;
+static uint8_t ylim = 0;
 
 static void Claw_UpdateFromJoystick(uint16_t x, uint16_t y)
 {
 
-    X_Limit_Checker(dir, &xlim);
+    X_Limit_Checker(xdir, &xlim);
+    Y_Limit_Checker(ydir, &ylim);
 
-    if (x > y && x > 3000 && xlim != XLIM_POS)
+    if (x > y && x > 3000 && xlim != LIM_POS)
     {
         Motor_Step(AXIS_X, DIR_FORWARD, 10);
-        dir = DIR_FORWARD;
+        xdir = DIR_FORWARD;
     }
-    else if (y > x && y > 3000)
+    else if (y > x && y > 3000 && ylim != LIM_POS)
     {
         Motor_Step(AXIS_Y, DIR_FORWARD, 10);
-        dir = DIR_FORWARD;
+        ydir = DIR_FORWARD;
     }
-    else if (x < y && x < 1500 && xlim != XLIM_NEG)
+    else if (x < y && x < 1500 && xlim != LIM_NEG)
     {
         Motor_Step(AXIS_X, DIR_BACKWARD, 10);
-        dir = DIR_BACKWARD;
+        xdir = DIR_BACKWARD;
     }
-    else if (y < x && y < 1500)
+    else if (y < x && y < 1500 && ylim != LIM_NEG)
     {
         Motor_Step(AXIS_Y, DIR_BACKWARD, 10);
-        dir = DIR_BACKWARD;
+        ydir = DIR_BACKWARD;
     }
 }
 
@@ -202,31 +237,30 @@ static void Game_ChangeState(game_state_t new_state)
     {
     case STATE_IDLE:
         Idle_IsDisplayed = 0;
-        Display_ShowIdleScreen();
         break;
 
     case STATE_PLAYER1_TURN_GRAB:
-        remaining_prev = PLAYER_TURN_TIME_MS;
+        remaining_prev_sec = PLAYER_TURN_TIME_MS/1000;
         game.active_player = PLAYER_1;
-        Display_ShowPlayerTurn(PLAYER_1, PLAYER_TURN_TIME_MS);
+        Display_ShowPlayerTurn(PLAYER_1, PLAYER_TURN_TIME_MS, 1);
         break;
 
     case STATE_PLAYER2_TURN_GRAB:
-        remaining_prev = PLAYER_TURN_TIME_MS;
+        remaining_prev_sec = PLAYER_TURN_TIME_MS/1000;
         game.active_player = PLAYER_2;
-        Display_ShowPlayerTurn(PLAYER_2, PLAYER_TURN_TIME_MS);
+        Display_ShowPlayerTurn(PLAYER_2, PLAYER_TURN_TIME_MS, 1);
         break;
 
     case STATE_PLAYER1_TURN_DROP:
-        remaining_prev = PLAYER_TURN_TIME_MS;
+        remaining_prev_sec = PLAYER_TURN_TIME_MS/1000;
         game.active_player = PLAYER_1;
-        Display_ShowPlayerTurn(PLAYER_1, PLAYER_TURN_TIME_MS);
+        Display_ShowPlayerTurn(PLAYER_1, PLAYER_TURN_TIME_MS, 1);
         break;
 
     case STATE_PLAYER2_TURN_DROP:
-        remaining_prev = PLAYER_TURN_TIME_MS;
+        remaining_prev_sec = PLAYER_TURN_TIME_MS/1000;
         game.active_player = PLAYER_2;
-        Display_ShowPlayerTurn(PLAYER_2, PLAYER_TURN_TIME_MS);
+        Display_ShowPlayerTurn(PLAYER_2, PLAYER_TURN_TIME_MS, 1);
         break;
 
     case STATE_CHECK_BOARD:
@@ -260,6 +294,7 @@ static void Handle_IdleState(void)
     uint8_t pressed;
     if (!Idle_IsDisplayed) {
         Display_ShowIdleScreen();
+        Idle_IsDisplayed = 1;
     }
     Joystick_Read(&jx, &jy, &pressed);
 
@@ -282,12 +317,14 @@ static void Handle_PlayerTurnState_Grab(void)
     uint16_t jx, jy;
     uint8_t pressed;
 
+    uint8_t remaining_sec = (remaining+999)/1000;
+
     Joystick_Read(&jx, &jy, &pressed);
     Claw_UpdateFromJoystick(jx, jy);
 
-    if ((remaining_prev - remaining) > 1000) {
-        Display_ShowPlayerTurn(game.active_player, remaining);
-        remaining_prev = remaining;
+    if (remaining_prev_sec != remaining_sec) {
+        Display_ShowPlayerTurn(game.active_player, remaining, 0);
+        remaining_prev_sec = remaining_sec;
     }
 
     if (pressed)
@@ -327,12 +364,14 @@ static void Handle_PlayerTurnState_Drop(void)
     uint16_t jx, jy;
     uint8_t pressed;
 
+    uint8_t remaining_sec = (remaining+999)/1000;
+
     Joystick_Read(&jx, &jy, &pressed);
     Claw_UpdateFromJoystick(jx, jy);
 
-    if ((remaining_prev - remaining) > 1000) {
-        Display_ShowPlayerTurn(game.active_player, remaining);
-        remaining_prev = remaining;
+    if (remaining_prev_sec != remaining_sec) {
+        Display_ShowPlayerTurn(game.active_player, remaining, 0);
+        remaining_prev_sec = remaining_sec;
     }
 
     if (pressed)
@@ -397,6 +436,8 @@ static void Handle_EndState(void)
 
 static void Handle_ResetState(void)
 {
+    xlim = LIM_NONE;
+    ylim = LIM_NONE;
     Board_Init();
     game.active_player = PLAYER_1;
     Game_ChangeState(STATE_IDLE);
@@ -410,8 +451,6 @@ void Game_Init(void)
     Board_Init();
     Game_ChangeState(STATE_IDLE);
     game.active_player = PLAYER_1;
-    game.current_state = STATE_IDLE;
-    game.turn_start_time = 0;
 }
 
 void Game_Update(void)

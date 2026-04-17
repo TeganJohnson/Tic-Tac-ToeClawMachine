@@ -6,7 +6,7 @@
 // -----------------------------------------------------------------------------
 // Timing constants
 // -----------------------------------------------------------------------------
-#define PLAYER_TURN_TIME_MS 5000
+#define PLAYER_TURN_TIME_MS 15000
 #define TRANSITION_TIME_MS  5000
 
 // -----------------------------------------------------------------------------
@@ -52,5 +52,6 @@ void Game_Update(void);
 game_state_t Game_GetState(void);
 player_t Game_GetActivePlayer(void);
 const game_context_t* Game_GetContext(void);
+void Handle_PlayerTurnState_Grab(void);
 
 #endif

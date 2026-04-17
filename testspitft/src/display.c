@@ -191,15 +191,19 @@ void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms, uint8_t
 {
 
     if (player == PLAYER_1 && bg) {
-        LCD_DrawString(40, 40, "PLAYER 1 TURN", COLOR_RED, COLOR_BLACK, 2);
+        LCD_FillColor(COLOR_RED);
+        LCD_DrawString(40, 40, "PLAYER 1 TURN", COLOR_WHITE, COLOR_BLACK, 2);
         LCD_DrawString(30, 200, "USE JOYSTICK", COLOR_WHITE, COLOR_BLACK, 2);
         LCD_DrawString(20, 230, "PRESS TO DROP", COLOR_WHITE, COLOR_BLACK, 2);
         LCD_DrawString(60, 100, "TIME:", COLOR_WHITE, COLOR_BLACK, 3);
+        return;
     } else if (bg) {
-        LCD_DrawString(40, 40, "PLAYER 2 TURN", COLOR_BLUE, COLOR_BLACK, 2);
+        LCD_FillColor(COLOR_BLUE);
+        LCD_DrawString(40, 40, "PLAYER 2 TURN", COLOR_WHITE, COLOR_BLACK, 2);
         LCD_DrawString(30, 200, "USE JOYSTICK", COLOR_WHITE, COLOR_BLACK, 2);
         LCD_DrawString(20, 230, "PRESS TO DROP", COLOR_WHITE, COLOR_BLACK, 2);
         LCD_DrawString(60, 100, "TIME:", COLOR_WHITE, COLOR_BLACK, 3);
+        return;
     }
 
     char time_str[8];
@@ -207,7 +211,7 @@ void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms, uint8_t
     u16_to_str(seconds, time_str);
 
     if (time_str[0] == '9') {
-        LCD_FillRect(140, 100, 24, 21, COLOR_BLACK);
+        LCD_FillRect(140, 100, 33, 21, COLOR_BLACK);
     }
 
     LCD_DrawString(140, 100, time_str, COLOR_YELLOW, COLOR_BLACK, 3);

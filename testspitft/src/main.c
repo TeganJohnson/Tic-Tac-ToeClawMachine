@@ -613,7 +613,7 @@ void Joystick_and_Motor_Test(void)
             Motor_Step(AXIS_X, DIR_FORWARD, 10);
             xdir = DIR_FORWARD;
         }
-        else if (y > x && y > 3500 && ylim != LIM_POS)
+        else if (y > x && y > 3000 && ylim != LIM_POS)
         {
             Motor_Step(AXIS_Y, DIR_FORWARD, 10);
             ydir = DIR_FORWARD;
@@ -623,7 +623,7 @@ void Joystick_and_Motor_Test(void)
             Motor_Step(AXIS_X, DIR_BACKWARD, 10);
             xdir = DIR_BACKWARD;
         }
-        else if (y < x && y < 800 && ylim != LIM_NEG)
+        else if (y < x && y < 100 && ylim != LIM_NEG)
         {
             Motor_Step(AXIS_Y, DIR_BACKWARD, 10);
             ydir = DIR_BACKWARD;
@@ -679,9 +679,11 @@ int main(void)
     Joystick_ADC_Init();
     TCS_Init();
     Motor_Init();
-    // Game_Init();
+    Game_Init();
     Motor_Enable();
     delay_ms(20);
-
-    Joystick_and_Motor_Test();
+    
+    while(1) {
+        Handle_PlayerTurnState_Grab();
+    }
 }

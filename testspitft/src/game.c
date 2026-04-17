@@ -26,10 +26,10 @@ extern void Motor_MoveZ(motor_dir_t dir, uint32_t steps);
 extern void Motor_MoveClaw(motor_dir_t dir, uint32_t steps);
 
 #define X_LIMIT_GPIO GPIOB
-#define X_LIMIT_PIN 3
+#define X_LIMIT_PIN 4
 
 #define Y_LIMIT_GPIO GPIOB
-#define Y_LIMIT_PIN 4
+#define Y_LIMIT_PIN 3
 
 #define LIM_NONE 0
 #define LIM_POS 1
@@ -307,10 +307,20 @@ static void Handle_IdleState(void)
     }
 }
 
+static uint8_t display_shown = 0;
 
-static void Handle_PlayerTurnState_Grab(void)
+void Handle_PlayerTurnState_Grab(void)
 {
-    uint32_t elapsed = millis() - game.turn_start_time;
+    if (!display_shown && game.active_player == PLAYER_1) {
+        Display_ShowPlayerTurn(PLAYER_1, PLAYER_TURN_TIME_MS, 1);
+        display_shown = 1;
+    }
+    if (!display_shown && game.active_player == PLAYER_2) {
+        Display_ShowPlayerTurn(PLAYER_2, PLAYER_TURN_TIME_MS, 1);
+        display_shown = 1;
+    }
+
+    uint32_t elapsed = millis() - game.turn_start_time - 3000;
     uint32_t remaining =
         (elapsed >= PLAYER_TURN_TIME_MS) ? 0 : (PLAYER_TURN_TIME_MS - elapsed);
 
@@ -327,30 +337,35 @@ static void Handle_PlayerTurnState_Grab(void)
         remaining_prev_sec = remaining_sec;
     }
 
-    if (pressed)
-    {
-        Claw_Grab_Token();
+    // if (pressed)
+    // {
+    //     Claw_Grab_Token();
         
-        if (game.active_player == PLAYER_1) {
-            Game_ChangeState(STATE_PLAYER1_TURN_DROP);
-        }
-        else if (game.active_player == PLAYER_2) {
-            Game_ChangeState(STATE_PLAYER2_TURN_DROP);
-        }
+    //     if (game.active_player == PLAYER_1) {
+    //         Game_ChangeState(STATE_PLAYER1_TURN_DROP);
+    //     }
+    //     else if (game.active_player == PLAYER_2) {
+    //         Game_ChangeState(STATE_PLAYER2_TURN_DROP);
+    //     }
 
-        delay_ms(200);
-        return;
-    }
+    //     delay_ms(200);
+    //     return;
+    // }
 
     if (elapsed >= PLAYER_TURN_TIME_MS)
     {
         Claw_Grab_Token();
+        game.turn_start_time = millis();
 
         if (game.active_player == PLAYER_1) {
-            Game_ChangeState(STATE_PLAYER1_TURN_DROP);
+            // Game_ChangeState(STATE_PLAYER1_TURN_DROP);
+            display_shown = 0;
+            game.active_player = PLAYER_2;
         }
         else if (game.active_player == PLAYER_2) {
-            Game_ChangeState(STATE_PLAYER2_TURN_DROP);
+            // Game_ChangeState(STATE_PLAYER2_TURN_DROP);
+            display_shown = 0;
+            game.active_player = PLAYER_1;
         }
     }
 }

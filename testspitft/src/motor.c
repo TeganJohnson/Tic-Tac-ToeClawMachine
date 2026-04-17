@@ -9,8 +9,8 @@ extern void delay_ms(uint32_t ms);
 // -----------------------------------------------------------------------------
 // Number of Steps to Lower/Raise to/from the Play Area
 // -----------------------------------------------------------------------------
-#define LOWER_STEPS 100
-#define RAISE_STEPS 100
+#define LOWER_STEPS 1000
+#define RAISE_STEPS 1000
 
 // -----------------------------------------------------------------------------
 // Number of Steps to Close/Open the Claw
@@ -188,6 +188,7 @@ void Motor_Step(axis_t axis1, motor_dir_t dir, uint32_t steps)
 
 void Claw_Grab_Token(void) {
     Motor_MoveZ(DIR_FORWARD, LOWER_STEPS);
+    delay_ms(1000);
     Motor_MoveClaw(DIR_FORWARD, CLOSE_STEPS);
     Motor_MoveZ(DIR_BACKWARD, RAISE_STEPS);
 }

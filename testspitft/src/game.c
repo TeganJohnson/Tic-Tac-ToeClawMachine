@@ -25,11 +25,11 @@ extern void Motor_MoveY(motor_dir_t dir, uint32_t steps);
 extern void Motor_MoveZ(motor_dir_t dir, uint32_t steps);
 extern void Motor_MoveClaw(motor_dir_t dir, uint32_t steps);
 
-#define X_LIMIT_GPIO GPIOA
-#define X_LIMIT_PIN 11
+#define X_LIMIT_GPIO GPIOB
+#define X_LIMIT_PIN 3
 
-#define Y_LIMIT_GPIO GPIOA
-#define Y_LIMIT_PIN 10
+#define Y_LIMIT_GPIO GPIOB
+#define Y_LIMIT_PIN 4
 
 #define LIM_NONE 0
 #define LIM_POS 1

@@ -24,6 +24,12 @@ extern void delay_ms(uint32_t ms);
 #define DROP_STEPS 0
 #define DROP_RAISE_STEPS 0
 
+#define X_LIMIT_GPIO GPIOB
+#define X_LIMIT_PIN 3
+
+#define Y_LIMIT_GPIO GPIOB
+#define Y_LIMIT_PIN 4
+
 // -----------------------------------------------------------------------------
 // Microsecond busy-wait
 // Assumes 8MHz system clock. Adjust cycle count if clock changes.
@@ -45,6 +51,7 @@ static void delay_us(uint32_t us)
 //
 // Shared enable: PB9 (active LOW on DRV8825)
 // -----------------------------------------------------------------------------
+
 #define MOTOR_EN_PORT   GPIOB
 #define MOTOR_EN_PIN    9
  
@@ -72,13 +79,10 @@ void gpio_pullup(GPIO_TypeDef *port, uint8_t pin) {
 // -----------------------------------------------------------------------------
 void Motor_Init(void)
 {
-    gpio_pullup(GPIOB, 10);
-    gpio_pullup(GPIOB, 11);
-    gpio_pullup(GPIOB, 12);
 
-    gpio_pullup(GPIOA, 11);
-    gpio_pullup(GPIOA, 12);
-    gpio_pullup(GPIOA, 10);
+    gpio_pullup(X_LIMIT_GPIO, X_LIMIT_PIN);
+    gpio_pullup(Y_LIMIT_GPIO, Y_LIMIT_PIN);
+
     // Enable pin — PB9 output, start HIGH (disabled)
     MOTOR_EN_PORT->MODER &= ~(3 << (MOTOR_EN_PIN * 2));
     MOTOR_EN_PORT->MODER |=  (1 << (MOTOR_EN_PIN * 2));

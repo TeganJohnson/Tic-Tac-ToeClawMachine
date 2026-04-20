@@ -8,7 +8,7 @@ extern void LCD_SetAddressWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t
 // ----------------------------------------------------
 // Utility
 // ----------------------------------------------------
-static void u16_to_str(uint16_t v, char *buf)
+void u16_to_str(uint16_t v, char *buf)
 {
     char tmp[6];
     int pos = 0;
@@ -184,25 +184,37 @@ void Display_ShowIdleScreen(void)
     LCD_DrawString(60, 230, "TO START", COLOR_WHITE, COLOR_BLACK, 2);
 }
 
-void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms)
-{
-    LCD_FillColor(COLOR_BLACK);
 
-    if (player == PLAYER_1) {
-        LCD_DrawString(40, 40, "PLAYER 1 TURN", COLOR_RED, COLOR_BLACK, 2);
-    } else {
-        LCD_DrawString(40, 40, "PLAYER 2 TURN", COLOR_BLUE, COLOR_BLACK, 2);
+//TODO:
+//Make sure function only rewrites the seconds, not the entire display.
+void Display_ShowPlayerTurn(player_t player, uint32_t time_remaining_ms, uint8_t bg)
+{
+
+    if (player == PLAYER_1 && bg) {
+        LCD_FillColor(COLOR_RED);
+        LCD_DrawString(40, 40, "PLAYER 1 TURN", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(30, 200, "USE JOYSTICK", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(20, 230, "PRESS TO DROP", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(60, 100, "TIME:", COLOR_WHITE, COLOR_BLACK, 3);
+        return;
+    } else if (bg) {
+        LCD_FillColor(COLOR_BLUE);
+        LCD_DrawString(40, 40, "PLAYER 2 TURN", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(30, 200, "USE JOYSTICK", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(20, 230, "PRESS TO DROP", COLOR_WHITE, COLOR_BLACK, 2);
+        LCD_DrawString(60, 100, "TIME:", COLOR_WHITE, COLOR_BLACK, 3);
+        return;
     }
 
     char time_str[8];
     uint8_t seconds = (time_remaining_ms + 999) / 1000;
     u16_to_str(seconds, time_str);
 
-    LCD_DrawString(60, 100, "TIME:", COLOR_WHITE, COLOR_BLACK, 3);
-    LCD_DrawString(140, 100, time_str, COLOR_YELLOW, COLOR_BLACK, 3);
+    if (time_str[0] == '9') {
+        LCD_FillRect(140, 100, 33, 21, COLOR_BLACK);
+    }
 
-    LCD_DrawString(30, 200, "USE JOYSTICK", COLOR_WHITE, COLOR_BLACK, 2);
-    LCD_DrawString(20, 230, "PRESS TO DROP", COLOR_WHITE, COLOR_BLACK, 2);
+    LCD_DrawString(140, 100, time_str, COLOR_YELLOW, COLOR_BLACK, 3);
 }
 
 void Display_ShowCheckingBoard(void)

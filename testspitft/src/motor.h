@@ -73,5 +73,8 @@ void Motor_MoveX(motor_dir_t dir, uint32_t steps);
 void Motor_MoveY(motor_dir_t dir, uint32_t steps);
 void Motor_MoveZ(motor_dir_t dir, uint32_t steps);
 void Motor_MoveClaw(motor_dir_t dir, uint32_t steps);
+void Motor_MoveXZ(motor_dir_t dir, uint32_t steps);
+void Claw_Drop_Token(void);
+void Claw_Grab_Token(void);
 
 #endif

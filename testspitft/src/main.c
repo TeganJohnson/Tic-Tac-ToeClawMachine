@@ -36,6 +36,41 @@
 #define XLIM_POS 1
 #define XLIM_NEG 2
 
+
+static void Clock_Init_HSE_48MHz(void)
+{
+    /* Enable HSE crystal oscillator */
+    RCC->CR |= RCC_CR_HSEON;
+    while (!(RCC->CR & RCC_CR_HSERDY)) {
+    }
+
+    /* One flash wait state and prefetch for 48 MHz */
+    FLASH->ACR = FLASH_ACR_PRFTBE | FLASH_ACR_LATENCY;
+
+    /* HSE as PLL source, HSE/PREDIV, PLL x6 => 8 MHz * 6 = 48 MHz */
+    RCC->CFGR &= ~(RCC_CFGR_SW |
+                   RCC_CFGR_HPRE |
+                   RCC_CFGR_PPRE |
+                   RCC_CFGR_PLLSRC |
+                   RCC_CFGR_PLLMUL);
+
+    RCC->CFGR |= RCC_CFGR_PLLSRC_HSE_PREDIV;
+    RCC->CFGR |= RCC_CFGR_PLLMUL6;
+
+    /* Enable PLL */
+    RCC->CR |= RCC_CR_PLLON;
+    while (!(RCC->CR & RCC_CR_PLLRDY)) {
+    }
+
+    /* Switch SYSCLK to PLL */
+    RCC->CFGR &= ~RCC_CFGR_SW;
+    RCC->CFGR |= RCC_CFGR_SW_PLL;
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {
+    }
+
+    SystemCoreClockUpdate();
+}
+
 // ----------------------------------------------------
 // Delay
 // ----------------------------------------------------
@@ -58,7 +93,7 @@ void SysTick_Handler(void)
 static void SysTick_Init(void)
 {
     // Configure SysTick for 1ms interrupt (assuming 8MHz system clock)
-    SysTick->LOAD = 8000 - 1;
+    SysTick->LOAD = 48000 - 1;
     SysTick->VAL = 0;
     SysTick->CTRL = (1 << 0) | (1 << 1) | (1 << 2);
 }
@@ -672,6 +707,7 @@ void Hardware_ScanBoard(uint8_t scanned_board[9])
 // ----------------------------------------------------
 int main(void)
 {
+    Clock_Init_HSE_48MHz();
     GPIO_Init();
     SPI1_Init();
     SysTick_Init();
@@ -684,6 +720,7 @@ int main(void)
     delay_ms(20);
     
     while(1) {
-        Handle_PlayerTurnState_Grab();
+        LCD_FillColor(COLOR_BLUE);
+        delay_ms(100);
     }
 }
